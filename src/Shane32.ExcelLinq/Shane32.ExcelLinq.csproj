@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>C# library to allow easy access to datasets contained within Excel workbooks</Description>
   </PropertyGroup>
 
   <ItemGroup>
