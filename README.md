@@ -1,4 +1,4 @@
-# ExcelLinq
+# Shane32.ExcelLinq
 
 [![NuGet](https://img.shields.io/nuget/v/Shane32.ExcelLinq.svg)](https://www.nuget.org/packages/Shane32.ExcelLinq)
 
