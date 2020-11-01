@@ -129,12 +129,15 @@ namespace General
         [TestMethod]
         public void ModelNotYetValid()
         {
-            Assert.ThrowsException<InvalidOperationException>(() => new ExcelContextModelNotYetValid());
+            _ = new ExcelContextModelNotYetValid();
         }
 
         private class ExcelContextModelNotYetValid : ExcelContext
         {
-            protected override void OnModelCreating(ExcelModelBuilder modelBuilder) => _ = Model;
+            protected override void OnModelCreating(ExcelModelBuilder modelBuilder) {
+                Assert.ThrowsException<InvalidOperationException>(() => Model);
+                Assert.ThrowsException<InvalidOperationException>(() => GetSheet<Class1>());
+            }
         }
 
         //[TestMethod]
