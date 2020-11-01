@@ -364,16 +364,25 @@ namespace Shane32.ExcelLinq
 
         protected virtual void DefaultWriteSerializer(ExcelRange cell, object value)
         {
+            /*
             cell.Value = value switch
             {
                 null => null,
                 DateTime dt => dt.ToOADate(),
                 TimeSpan ts => DateTime.FromOADate(0).Add(ts).ToOADate(),
-                DateTimeOffset dto => throw new NotSupportedException("DateTimeOffset values are not supported"),
+                DateTimeOffset _ => throw new NotSupportedException("DateTimeOffset values are not supported"),
                 Guid guid => guid.ToString(),
                 Uri uri => uri.ToString(),
                 _ => value
             };
+            */
+            if (value == null) cell.Value = null;
+            else if (value is DateTime dt) cell.Value = dt.ToOADate();
+            else if (value is TimeSpan ts) cell.Value = DateTime.FromOADate(0).Add(ts).ToOADate();
+            else if (value is DateTimeOffset) throw new NotSupportedException("DateTimeOffset values are not supported");
+            else if (value is Guid guid) cell.Value = guid.ToString();
+            else if (value is Uri uri) cell.Value = uri.ToString();
+            else cell.Value = value;
         }
 
         protected virtual void OnWriteFile(ExcelWorkbook workbook)

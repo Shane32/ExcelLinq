@@ -29,6 +29,7 @@ namespace Serializers
         [DataRow(null, null, DisplayName = "null")]
         public void Test(object input, object expectedOutput)
         {
+            cell.Value = "invalid";
             context.TestDefaultWriteSerializer(cell, input);
             Assert.AreEqual(expectedOutput, cell.Value);
         }
@@ -49,7 +50,7 @@ namespace Serializers
         }
 
         [TestMethod]
-        public void TimeSpanOffsetTest()
+        public void TimeSpanTest()
         {
             var timeSpan = TimeSpan.FromMinutes(288);
             context.TestDefaultWriteSerializer(cell, timeSpan);
