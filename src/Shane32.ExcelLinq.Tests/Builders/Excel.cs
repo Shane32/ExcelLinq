@@ -1,5 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Shane32.ExcelLinq;
 using Shane32.ExcelLinq.Builders;
+using Shane32.ExcelLinq.Tests.Models;
 
 namespace Builders
 {

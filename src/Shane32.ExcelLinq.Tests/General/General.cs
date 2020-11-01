@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ModelInterfaces;
 using Moq;
 using Moq.Protected;
 using OfficeOpenXml;
@@ -74,6 +76,68 @@ namespace General
                 context.GetSheet<Class2>();
             });
             mock.Verify();
+        }
+
+        [TestMethod]
+        public void Constructor_NullStream()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => new ExcelContextNullStream());
+        }
+
+        private class ExcelContextNullStream : ExcelContext
+        {
+            public ExcelContextNullStream() : base((Stream)null) { }
+            protected override void OnModelCreating(ExcelModelBuilder modelBuilder) { }
+        }
+
+        [TestMethod]
+        public void Constructor_NullModel()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => new ExcelContextNullModel());
+        }
+
+        private class ExcelContextNullModel : ExcelContext
+        {
+            public ExcelContextNullModel() : base((Shane32.ExcelLinq.Models.IExcelModel)null) { }
+            protected override void OnModelCreating(ExcelModelBuilder modelBuilder) { }
+        }
+
+        [TestMethod]
+        public void Constructor_NullPackage()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => new ExcelContextNullPackage());
+        }
+
+        private class ExcelContextNullPackage : ExcelContext
+        {
+            public ExcelContextNullPackage() : base((ExcelPackage)null) { }
+            protected override void OnModelCreating(ExcelModelBuilder modelBuilder) { }
+        }
+
+        [TestMethod]
+        public void Constructor_NullString()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => new ExcelContextNullString());
+        }
+
+        private class ExcelContextNullString : ExcelContext
+        {
+            public ExcelContextNullString() : base((string)null) { }
+            protected override void OnModelCreating(ExcelModelBuilder modelBuilder) { }
+        }
+
+        [TestMethod]
+        public void ModelNotYetValid()
+        {
+            _ = new ExcelContextModelNotYetValid();
+        }
+
+        private class ExcelContextModelNotYetValid : ExcelContext
+        {
+            protected override void OnModelCreating(ExcelModelBuilder modelBuilder) {
+                Assert.ThrowsException<InvalidOperationException>(() => Model);
+                Assert.ThrowsException<InvalidOperationException>(() => GetSheet<Class1>());
+            }
         }
 
         //[TestMethod]

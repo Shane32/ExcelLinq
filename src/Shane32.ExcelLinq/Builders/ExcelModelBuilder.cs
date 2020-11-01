@@ -46,19 +46,13 @@ namespace Shane32.ExcelLinq.Builders
 
         ISheetModel ISheetModelLookup.this[Type type] => _typeDictionary[type];
 
-        ISheetModel ISheetModelLookup.this[string sheetName] => string.IsNullOrWhiteSpace(sheetName) ? null : _sheetDictionary[sheetName.Trim().ToLower()];
+        ISheetModel ISheetModelLookup.this[string sheetName] => _sheetDictionary[sheetName?.Trim().ToLower()];
 
         bool ISheetModelLookup.TryGetValue(string sheetName, out ISheetModel value)
-        {
-            if (string.IsNullOrWhiteSpace(sheetName)) {
-                value = null;
-                return false;
-            } else {
-                return _sheetDictionary.TryGetValue(sheetName.Trim().ToLower(), out value);
-            }
-        }
+            => _sheetDictionary.TryGetValue(sheetName?.Trim().ToLower(), out value);
 
-        bool ISheetModelLookup.TryGetValue(Type type, out ISheetModel value) => _typeDictionary.TryGetValue(type, out value);
+        bool ISheetModelLookup.TryGetValue(Type type, out ISheetModel value)
+            => _typeDictionary.TryGetValue(type, out value);
 
         internal IExcelModel Build() => this;
 

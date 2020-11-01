@@ -37,6 +37,20 @@ namespace Reading
         }
 
         [TestMethod]
+        public void SingleProperty()
+        {
+            sheet.SetValue(1, 1, "test");
+            var builder = new ExcelModelBuilder();
+            var sheetBuilder = builder.Sheet<Class2>();
+            sheetBuilder.Column(x => x.StringColumn);
+            var context = new SampleContext(builder.Build());
+            var result = context.TestOnReadRow(sheet.Cells[1, 1], context.Model.Sheets[0], new[] { context.Model.Sheets[0].Columns[0] });
+            Assert.IsInstanceOfType(result, typeof(Class2));
+            var ret = (Class2)result;
+            Assert.AreEqual("test", ret.StringColumn);
+        }
+
+        [TestMethod]
         public void Multiple()
         {
             sheet.SetValue(1, 1, "test1");

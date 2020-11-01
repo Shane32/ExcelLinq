@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ModelInterfaces;
 using Moq;
 using Moq.Protected;
 using OfficeOpenXml;
 using Shane32.ExcelLinq.Builders;
+using Shane32.ExcelLinq.Models;
 using Shane32.ExcelLinq.Tests.Models;
 
 namespace Writing
@@ -44,7 +48,7 @@ namespace Writing
                 FloatColumn = 12.222f,
                 GuidColumn = Guid.NewGuid(),
                 IntColumn = 11,
-                NullableIntColumn = 5,
+                NullableIntColumn = null,
                 StringColumn = "test2",
                 TimeSpanColumn = TimeSpan.FromHours(14),
                 UriColumn = new Uri("http://localhost/uri2")
@@ -55,6 +59,12 @@ namespace Writing
         public void Simple()
         {
             context.TestOnWriteRow(sheet.Cells[2, 2, 2, 12], context.Model.Sheets[0], testRow1);
+        }
+
+        [TestMethod]
+        public void SimpleProperties()
+        {
+            context.TestOnWriteRow(sheet.Cells[2, 2, 2, 2], context.Model.Sheets[1], new Class2() { StringColumn = "hello" });
         }
 
         [TestMethod]
@@ -124,27 +134,48 @@ namespace Writing
         [TestMethod]
         public void InvalidParametersThrows()
         {
-            context.TestOnWriteRow(sheet.Cells[1, 1, 1, 11], context.Model.Sheets[0], testRow1);
+            var validCells = sheet.Cells[1, 1, 1, 11];
+            var sheetModel = context.Model.Sheets[0];
+            context.TestOnWriteRow(validCells, sheetModel, testRow1);
             Assert.ThrowsException<ArgumentNullException>(() => {
-                context.TestOnWriteRow(null, context.Model.Sheets[0], testRow1);
+                context.TestOnWriteRow(null, sheetModel, testRow1);
             });
             Assert.ThrowsException<ArgumentNullException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 11], null, testRow1);
+                context.TestOnWriteRow(validCells, null, testRow1);
             });
             Assert.ThrowsException<ArgumentNullException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 11], context.Model.Sheets[0], null);
+                context.TestOnWriteRow(validCells, sheetModel, null);
             });
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 11], context.Model.Sheets[0], new Class2());
+                context.TestOnWriteRow(validCells, sheetModel, new Class2());
             });
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 10], context.Model.Sheets[0], testRow1);
+                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 10], sheetModel, testRow1);
             });
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 2, 11], context.Model.Sheets[0], testRow1);
+                context.TestOnWriteRow(sheet.Cells[1, 1, 2, 11], sheetModel, testRow1);
             });
         }
 
-        
+        [TestMethod]
+        public void InvalidColumnMemberThrows()
+        {
+            var mockColumn = new Mock<IColumnModel>();
+            mockColumn.SetupGet(x => x.Member).Returns((MemberInfo)null);
+            var columns = new List<IColumnModel> {
+                mockColumn.Object
+            };
+            var mockColumnLookup = new Mock<IColumnModelLookup>();
+            mockColumnLookup.SetupGet(x => x.Count).Returns(1);
+            mockColumnLookup.Setup(x => x.GetEnumerator()).Returns(() => columns.GetEnumerator());
+            mockColumnLookup.Setup(x => x[It.Is<int>(y => y == 0)]).Returns(() => mockColumn.Object);
+            var mockSheetModel = new Mock<Shane32.ExcelLinq.Models.ISheetModel>();
+            mockSheetModel.SetupGet(x => x.Type).Returns(typeof(Class1));
+            mockSheetModel.SetupGet(x => x.Columns).Returns(mockColumnLookup.Object);
+            var e = Assert.ThrowsException<InvalidOperationException>(() => {
+                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 1], mockSheetModel.Object, new Class1());
+            });
+            Assert.AreEqual("Column member expression is not a field or property", e.Message);
+        }
     }
 }

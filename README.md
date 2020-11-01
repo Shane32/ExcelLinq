@@ -1,6 +1,6 @@
 # Shane32.ExcelLinq
 
-[![NuGet](https://img.shields.io/nuget/v/Shane32.ExcelLinq.svg)](https://www.nuget.org/packages/Shane32.ExcelLinq)
+[![NuGet](https://img.shields.io/nuget/v/Shane32.ExcelLinq.svg)](https://www.nuget.org/packages/Shane32.ExcelLinq) [![Coverage Status](https://coveralls.io/repos/github/Shane32/ExcelLinq/badge.svg?branch=master)](https://coveralls.io/github/Shane32/ExcelLinq?branch=master)
 
 ExcelLinq lets you define an Excel workbook much like an Entity Framework data context, where sheets are tables, objects are rows, and properties are columns.  Once the `ExcelContext` is defined, you can load or save a workbook in a single call, add or enumerate data contained within, and use Linq to run any in-memory processing.  The context does not support primary/unique key definitions, nor can/does it enforce relationships across tables (sheets).  There is hooks available to provide basic formatting to the generated Excel file, to parse headers or filter rows from Excel sheets, or to append totals.  Sheets and columns can match based on name when deserializing an Excel workbook.
 

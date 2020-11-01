@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using Shane32.ExcelLinq.Builders;
@@ -149,10 +150,15 @@ namespace Builders
             var sheetBuilder = builder.Sheet<Class1>();
             sheetBuilder.Column(x => x.StringColumn)
                 .Optional()
+                .ReadSerializer(null)
                 .ReadSerializer(readSerializer)
+                .WriteSerializer(null)
                 .WriteSerializer(writeSerializer)
+                .HeaderFormatter(null)
                 .HeaderFormatter(headerFormatter)
+                .ColumnFormatter(null)
                 .ColumnFormatter(columnFormatter)
+                .WritePolisher(null)
                 .WritePolisher(writePolisher);
             var model = builder.Build();
             var sheetModel = model.Sheets[0];
@@ -179,6 +185,32 @@ namespace Builders
             sheetBuilder.Column(x => x.Valid3);
             sheetBuilder.Column(x => x.Valid4);
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => sheetBuilder.Column(x => x.Invalid1));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => sheetBuilder.Column(x => x.Invalid3()));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => sheetBuilder.Column(x => x.Invalid3(), "Invalid3"));
+        }
+
+        [TestMethod]
+        public void ColumnReturnsSameReference()
+        {
+            var builder = new ExcelModelBuilder();
+            var sheetBuilder = builder.Sheet<Class3>();
+            var col1 = sheetBuilder.Column(x => x.Valid1);
+            var col2 = sheetBuilder.Column(x => x.Valid2, "Test");
+            Assert.AreEqual(col1, sheetBuilder.Column(x => x.Valid1));
+            Assert.AreEqual(col2, sheetBuilder.Column(x => x.Valid2, "Test"));
+        }
+
+        [TestMethod]
+        public void CtorRedundantChecks()
+        {
+            var builder = new ExcelModelBuilder();
+            var sheetBuilder = builder.Sheet<Class3>();
+            Expression<Func<Class3, int>> expressionValid1 = c => c.Valid1;
+            var memberValid1 = (MemberExpression)expressionValid1.Body;
+            var memberInvalid2 = Expression.MakeMemberAccess(Expression.Parameter(typeof(Class3)), typeof(Class3).GetMember("Invalid2")[0]);
+            Assert.ThrowsException<ArgumentNullException>(() => new ColumnModelBuilder<Class3, int>(sheetBuilder, memberValid1, null));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColumnModelBuilder<Class3, int>(sheetBuilder, memberInvalid2, "test"));
+            Assert.ThrowsException<ArgumentNullException>(() => new ColumnModelBuilder<Class3, int>(null, memberValid1, "test"));
         }
     }
 }

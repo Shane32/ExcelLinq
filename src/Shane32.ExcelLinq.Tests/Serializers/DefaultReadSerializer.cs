@@ -149,6 +149,13 @@ namespace Serializers
         }
 
         [TestMethod]
+        public void DateTimeOffsetFromOA()
+        {
+            cell.Value = DateTime.Now.ToOADate();
+            Assert.ThrowsException<NotSupportedException>(() => context.TestDefaultReadSerializer(cell, typeof(DateTimeOffset)));
+        }
+
+        [TestMethod]
         public void DateTimeFromString()
         {
             var dNowStr = DateTime.Now.ToShortDateString();
@@ -198,6 +205,18 @@ namespace Serializers
             var test = context.TestDefaultReadSerializer(cell, typeof(Guid));
             Assert.IsInstanceOfType(test, typeof(Guid));
             Assert.AreEqual(guid, test);
+        }
+
+        [DataTestMethod]
+        [DataRow(typeof(string), DisplayName = "string")]
+        [DataRow(typeof(int?), DisplayName = "int?")]
+        [DataRow(typeof(int), DisplayName = "int")]
+        [DataRow(typeof(Guid), DisplayName = "Guid")]
+        [DataRow(typeof(DateTime), DisplayName = "DateTime")]
+        public void NullReturnsNull(Type type)
+        {
+            cell.Value = null;
+            Assert.IsNull(context.TestDefaultReadSerializer(cell, type));
         }
 
         [DataTestMethod]

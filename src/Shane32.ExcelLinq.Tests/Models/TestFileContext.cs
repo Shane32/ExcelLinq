@@ -9,6 +9,7 @@ namespace Shane32.ExcelLinq.Tests.Models
     {
         public TestFileContext(System.IO.Stream stream) : base(stream) { }
         public TestFileContext(string filename) : base(filename) { }
+        public TestFileContext(ExcelPackage excelPackage) : base(excelPackage) { }
 
         protected override void OnModelCreating(ExcelModelBuilder builder)
         {
@@ -34,14 +35,14 @@ namespace Shane32.ExcelLinq.Tests.Models
                     var sheet = range.Worksheet;
                     var qtyAddress = sheet.Cells[range.Start.Row, 2].Address;
                     var amountAddress = sheet.Cells[range.Start.Row, 4].Address;
-                    range.Formula = $"={qtyAddress}*{amountAddress}";
+                    range.Formula = $"{qtyAddress}*{amountAddress}";
                 })
                 .HeaderFormatter(headerFormatter)
                 .ColumnFormatter(numberFormatter)
                 .WritePolisher(range => {
                     range = range[range.Start.Row + 1, range.Start.Column, range.End.Row + 1, range.End.Column];
                     var totalRange = range.Worksheet.Cells[range.End.Row + 1, range.End.Column];
-                    totalRange.Formula = $"=SUM({range.Address})";
+                    totalRange.Formula = $"SUM({range.Address})";
                     totalRange.Style.Numberformat.Format = "$ #,##0.00";
                     range[totalRange.Start.Row, totalRange.Start.Column - 1].Value = "Total";
                 });
@@ -90,6 +91,12 @@ namespace Shane32.ExcelLinq.Tests.Models
             if (range.Worksheet.Cells[range.Start.Row, 1].Value == null) return null;
 
             return base.OnReadRow(range, model, columnMapping);
+        }
+
+        protected override void OnWriteFile(ExcelWorkbook workbook)
+        {
+            base.OnWriteFile(workbook);
+            workbook.Calculate();
         }
 
         public class Sheet1

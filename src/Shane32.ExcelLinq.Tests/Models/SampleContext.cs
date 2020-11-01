@@ -72,6 +72,7 @@ namespace Shane32.ExcelLinq.Tests.Models
             sheet1.Column(x => x.NullableIntColumn)
                 .Optional();
             var sheet2 = modelBuilder.Sheet<Class2>();
+            sheet2.Column(x => x.StringColumn);
         }
 
         public object TestDefaultReadSerializer(ExcelRange cell, Type dataType)

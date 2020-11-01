@@ -37,6 +37,7 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
+        // used by unit tests only
         internal ExcelContext(IExcelModel model)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
@@ -58,7 +59,6 @@ namespace Shane32.ExcelLinq
 
         protected ExcelContext(string filename) : this()
         {
-            if (filename == null) throw new ArgumentNullException(nameof(filename));
             using var stream = new FileStream(filename ?? throw new ArgumentNullException(nameof(filename)), FileMode.Open, FileAccess.Read, FileShare.Read);
             using var package = new ExcelPackage(stream);
             _initialized = false;
@@ -66,15 +66,15 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
-        internal ExcelContext(IExcelModel model, string filename) : this(model)
-        {
-            if (filename == null) throw new ArgumentNullException(nameof(filename));
-            using var stream = new FileStream(filename ?? throw new ArgumentNullException(nameof(filename)), FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var package = new ExcelPackage(stream);
-            _initialized = false;
-            _sheets = InitializeReadFile(package);
-            _initialized = true;
-        }
+        //internal ExcelContext(IExcelModel model, string filename) : this(model)
+        //{
+        //    if (filename == null) throw new ArgumentNullException(nameof(filename));
+        //    using var stream = new FileStream(filename ?? throw new ArgumentNullException(nameof(filename)), FileMode.Open, FileAccess.Read, FileShare.Read);
+        //    using var package = new ExcelPackage(stream);
+        //    _initialized = false;
+        //    _sheets = InitializeReadFile(package);
+        //    _initialized = true;
+        //}
 
         protected ExcelContext(Stream stream) : this()
         {
@@ -85,14 +85,14 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
-        internal ExcelContext(IExcelModel model, Stream stream) : this(model)
-        {
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
-            using var package = new ExcelPackage(stream);
-            _initialized = false;
-            _sheets = InitializeReadFile(package);
-            _initialized = true;
-        }
+        //internal ExcelContext(IExcelModel model, Stream stream) : this(model)
+        //{
+        //    if (stream == null) throw new ArgumentNullException(nameof(stream));
+        //    using var package = new ExcelPackage(stream);
+        //    _initialized = false;
+        //    _sheets = InitializeReadFile(package);
+        //    _initialized = true;
+        //}
 
         protected ExcelContext(ExcelPackage excelPackage) : this()
         {
@@ -101,12 +101,12 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
-        internal ExcelContext(IExcelModel model, ExcelPackage excelPackage) : this(model)
-        {
-            _initialized = false;
-            _sheets = InitializeReadFile(excelPackage);
-            _initialized = true;
-        }
+        //internal ExcelContext(IExcelModel model, ExcelPackage excelPackage) : this(model)
+        //{
+        //    _initialized = false;
+        //    _sheets = InitializeReadFile(excelPackage);
+        //    _initialized = true;
+        //}
 
         private List<IList> InitializeReadFile(ExcelPackage excelFile)
         {
@@ -341,7 +341,7 @@ namespace Shane32.ExcelLinq
                 return DateTime.FromOADate((double)DefaultReadSerializer(cell, typeof(double))).TimeOfDay;
             }
             if (dataType == typeof(DateTimeOffset)) {
-                return (DateTimeOffset)DefaultReadSerializer(cell, typeof(DateTime));
+                throw new NotSupportedException("DateTimeOffset values are not supported");
             }
             if (dataType == typeof(Uri)) {
                 return new Uri(cell.Text);
@@ -364,16 +364,25 @@ namespace Shane32.ExcelLinq
 
         protected virtual void DefaultWriteSerializer(ExcelRange cell, object value)
         {
+            /*
             cell.Value = value switch
             {
                 null => null,
                 DateTime dt => dt.ToOADate(),
                 TimeSpan ts => DateTime.FromOADate(0).Add(ts).ToOADate(),
-                DateTimeOffset dto => dto.DateTime.ToOADate(),
+                DateTimeOffset _ => throw new NotSupportedException("DateTimeOffset values are not supported"),
                 Guid guid => guid.ToString(),
                 Uri uri => uri.ToString(),
                 _ => value
             };
+            */
+            if (value == null) cell.Value = null;
+            else if (value is DateTime dt) cell.Value = dt.ToOADate();
+            else if (value is TimeSpan ts) cell.Value = DateTime.FromOADate(0).Add(ts).ToOADate();
+            else if (value is DateTimeOffset) throw new NotSupportedException("DateTimeOffset values are not supported");
+            else if (value is Guid guid) cell.Value = guid.ToString();
+            else if (value is Uri uri) cell.Value = uri.ToString();
+            else cell.Value = value;
         }
 
         protected virtual void OnWriteFile(ExcelWorkbook workbook)
@@ -432,12 +441,15 @@ namespace Shane32.ExcelLinq
             if (range == null) throw new ArgumentNullException(nameof(range));
             if (model == null) throw new ArgumentNullException(nameof(model));
             if (data == null) throw new ArgumentNullException(nameof(data));
-            if (data != null && !model.Type.IsAssignableFrom(data.GetType())) throw new ArgumentOutOfRangeException("Data type does not match column type");
+            if (!model.Type.IsAssignableFrom(data.GetType()))
+                throw new ArgumentOutOfRangeException("Data type does not match column type");
             var columns = model.Columns.Count;
             var row = range.Start.Row;
             var firstCol = range.Start.Column;
-            if (columns != (range.End.Column - range.Start.Column + 1)) throw new ArgumentOutOfRangeException("Columns in range does not match columns in model");
-            if (range.Start.Row != range.End.Row) throw new ArgumentOutOfRangeException("Range has more than one row");
+            if (columns != (range.End.Column - range.Start.Column + 1))
+                throw new ArgumentOutOfRangeException("Columns in range does not match columns in model");
+            if (range.Start.Row != range.End.Row)
+                throw new ArgumentOutOfRangeException("Range has more than one row");
             for (int i = 0; i < columns; i++) {
                 var cell = range[row, firstCol + i]; //note: overwrites range with new address
                 var columnModel = model.Columns[i];
@@ -474,20 +486,24 @@ namespace Shane32.ExcelLinq
             return excelPackage;
         }
 
-        public virtual Stream SerializeToStream()
+        public virtual MemoryStream SerializeToStream()
         {
-            using var excelPackage = SerializeToExcelPackage();
             var stream = new MemoryStream();
-            excelPackage.SaveAs(stream);
+            SerializeToStream(stream);
             stream.Position = 0;
             return stream;
         }
 
-        public virtual void SerializeToFile(string filename)
+        public virtual void SerializeToStream(Stream stream)
         {
             using var excelPackage = SerializeToExcelPackage();
-            using var stream = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
             excelPackage.SaveAs(stream);
+        }
+
+        public virtual void SerializeToFile(string filename)
+        {
+            using var stream = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            SerializeToStream(stream);
         }
     }
 
