@@ -208,6 +208,18 @@ namespace Serializers
         }
 
         [DataTestMethod]
+        [DataRow(typeof(string), DisplayName = "string")]
+        [DataRow(typeof(int?), DisplayName = "int?")]
+        [DataRow(typeof(int), DisplayName = "int")]
+        [DataRow(typeof(Guid), DisplayName = "Guid")]
+        [DataRow(typeof(DateTime), DisplayName = "DateTime")]
+        public void NullReturnsNull(Type type)
+        {
+            cell.Value = null;
+            Assert.IsNull(context.TestDefaultReadSerializer(cell, type));
+        }
+
+        [DataTestMethod]
         [DataRow(true, true, DisplayName = "boolean")]
         [DataRow(0, false, DisplayName = "zero")]
         [DataRow(1, true, DisplayName = "one")]
