@@ -210,6 +210,7 @@ namespace Builders
             var memberInvalid2 = Expression.MakeMemberAccess(Expression.Parameter(typeof(Class3)), typeof(Class3).GetMember("Invalid2")[0]);
             Assert.ThrowsException<ArgumentNullException>(() => new ColumnModelBuilder<Class3, int>(sheetBuilder, memberValid1, null));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColumnModelBuilder<Class3, int>(sheetBuilder, memberInvalid2, "test"));
+            Assert.ThrowsException<ArgumentNullException>(() => new ColumnModelBuilder<Class3, int>(null, memberValid1, "test"));
         }
     }
 }

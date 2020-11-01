@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shane32.ExcelLinq;
 using Shane32.ExcelLinq.Builders;
+using Shane32.ExcelLinq.Models;
 using Shane32.ExcelLinq.Tests.Models;
 
 namespace ModelInterfaces
@@ -56,6 +58,10 @@ namespace ModelInterfaces
             var context = new MyContext();
             var model = context.Model;
             var sheets = model.Sheets.ToList();
+            var enumerator = ((IEnumerable)model.Sheets).GetEnumerator();
+            var testCount = 0;
+            while (enumerator.MoveNext()) testCount++;
+            Assert.AreEqual(2, testCount);
             Assert.AreEqual(2, sheets.Count);
             Assert.IsNotNull(sheets[0]);
             Assert.AreEqual("Class1", sheets[0].Name);

@@ -161,5 +161,13 @@ namespace Builders
             Assert.AreEqual(writeRangeLocator, model.Sheets[0].WriteRangeLocator);
             Assert.AreEqual(writePolisher, model.Sheets[0].WritePolisher);
         }
+
+        [TestMethod]
+        public void CtorRedundantChecks()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => new SheetModelBuilder<Class1>(null, "test"));
+            var builder = new ExcelModelBuilder();
+            Assert.ThrowsException<ArgumentNullException>(() => new SheetModelBuilder<Class1>(builder, null));
+        }
     }
 }

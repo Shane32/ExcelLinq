@@ -23,6 +23,7 @@ namespace Shane32.ExcelLinq.Builders
 
         public ColumnModelBuilder(SheetModelBuilder<T> sheetModelBuilder, MemberExpression memberExpression, string name)
         {
+            if (sheetModelBuilder == null) throw new ArgumentNullException(nameof(sheetModelBuilder));
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
             _member = memberExpression.Member;
             if (_member is PropertyInfo propertyInfo) {

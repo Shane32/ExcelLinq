@@ -22,9 +22,9 @@ namespace Shane32.ExcelLinq.Builders
 
         public SheetModelBuilder(ExcelModelBuilder excelModelBuilder, string name)
         {
+            _excelModelBuilder = excelModelBuilder ?? throw new ArgumentNullException(nameof(name));
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
             _sheetName = name.Trim();
-            _excelModelBuilder = excelModelBuilder;
             if (excelModelBuilder._typeDictionary.ContainsKey(typeof(T)))
                 throw new InvalidOperationException($"Type {typeof(T).Name} already exists in the database model");
             excelModelBuilder._sheetDictionary.Add(_sheetName.ToLower(), this);
@@ -94,14 +94,7 @@ namespace Shane32.ExcelLinq.Builders
         }
 
         bool IColumnModelLookup.TryGetValue(string columnName, out IColumnModel value)
-        {
-            if (string.IsNullOrWhiteSpace(columnName)) {
-                value = null;
-                return false;
-            } else {
-                return _columnDictionary.TryGetValue(columnName.Trim().ToLower(), out value);
-            }
-        }
+            => _columnDictionary.TryGetValue(columnName?.Trim().ToLower(), out value);
 
         IEnumerator<IColumnModel> IEnumerable<IColumnModel>.GetEnumerator() => _columns.GetEnumerator();
 
@@ -127,7 +120,7 @@ namespace Shane32.ExcelLinq.Builders
 
         IColumnModel IReadOnlyList<IColumnModel>.this[int index] => _columns[index];
 
-        IColumnModel IColumnModelLookup.this[string columnName] => string.IsNullOrWhiteSpace(columnName) ? null : _columnDictionary[columnName.Trim().ToLower()];
+        IColumnModel IColumnModelLookup.this[string columnName] => _columnDictionary[columnName?.Trim().ToLower()];
 
         bool ISheetModel.SkipEmptyRows => _skipEmptyRows;
     }
