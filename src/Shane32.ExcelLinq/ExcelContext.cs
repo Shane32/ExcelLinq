@@ -441,12 +441,15 @@ namespace Shane32.ExcelLinq
             if (range == null) throw new ArgumentNullException(nameof(range));
             if (model == null) throw new ArgumentNullException(nameof(model));
             if (data == null) throw new ArgumentNullException(nameof(data));
-            if (data != null && !model.Type.IsAssignableFrom(data.GetType())) throw new ArgumentOutOfRangeException("Data type does not match column type");
+            if (!model.Type.IsAssignableFrom(data.GetType()))
+                throw new ArgumentOutOfRangeException("Data type does not match column type");
             var columns = model.Columns.Count;
             var row = range.Start.Row;
             var firstCol = range.Start.Column;
-            if (columns != (range.End.Column - range.Start.Column + 1)) throw new ArgumentOutOfRangeException("Columns in range does not match columns in model");
-            if (range.Start.Row != range.End.Row) throw new ArgumentOutOfRangeException("Range has more than one row");
+            if (columns != (range.End.Column - range.Start.Column + 1))
+                throw new ArgumentOutOfRangeException("Columns in range does not match columns in model");
+            if (range.Start.Row != range.End.Row)
+                throw new ArgumentOutOfRangeException("Range has more than one row");
             for (int i = 0; i < columns; i++) {
                 var cell = range[row, firstCol + i]; //note: overwrites range with new address
                 var columnModel = model.Columns[i];

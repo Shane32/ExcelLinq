@@ -44,7 +44,7 @@ namespace Writing
                 FloatColumn = 12.222f,
                 GuidColumn = Guid.NewGuid(),
                 IntColumn = 11,
-                NullableIntColumn = 5,
+                NullableIntColumn = null,
                 StringColumn = "test2",
                 TimeSpanColumn = TimeSpan.FromHours(14),
                 UriColumn = new Uri("http://localhost/uri2")
@@ -55,6 +55,12 @@ namespace Writing
         public void Simple()
         {
             context.TestOnWriteRow(sheet.Cells[2, 2, 2, 12], context.Model.Sheets[0], testRow1);
+        }
+
+        [TestMethod]
+        public void SimpleProperties()
+        {
+            context.TestOnWriteRow(sheet.Cells[2, 2, 2, 2], context.Model.Sheets[1], new Class2() { StringColumn = "hello" });
         }
 
         [TestMethod]
@@ -124,24 +130,26 @@ namespace Writing
         [TestMethod]
         public void InvalidParametersThrows()
         {
-            context.TestOnWriteRow(sheet.Cells[1, 1, 1, 11], context.Model.Sheets[0], testRow1);
+            var validCells = sheet.Cells[1, 1, 1, 11];
+            var sheetModel = context.Model.Sheets[0];
+            context.TestOnWriteRow(validCells, sheetModel, testRow1);
             Assert.ThrowsException<ArgumentNullException>(() => {
-                context.TestOnWriteRow(null, context.Model.Sheets[0], testRow1);
+                context.TestOnWriteRow(null, sheetModel, testRow1);
             });
             Assert.ThrowsException<ArgumentNullException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 11], null, testRow1);
+                context.TestOnWriteRow(validCells, null, testRow1);
             });
             Assert.ThrowsException<ArgumentNullException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 11], context.Model.Sheets[0], null);
+                context.TestOnWriteRow(validCells, sheetModel, null);
             });
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 11], context.Model.Sheets[0], new Class2());
+                context.TestOnWriteRow(validCells, sheetModel, new Class2());
             });
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 10], context.Model.Sheets[0], testRow1);
+                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 10], sheetModel, testRow1);
             });
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => {
-                context.TestOnWriteRow(sheet.Cells[1, 1, 2, 11], context.Model.Sheets[0], testRow1);
+                context.TestOnWriteRow(sheet.Cells[1, 1, 2, 11], sheetModel, testRow1);
             });
         }
 
