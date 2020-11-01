@@ -40,13 +40,15 @@ jobs:
         run: dotnet build --no-restore -p:NoWarn=CS1591
       - name: Test solution [Debug]
         run: dotnet test --no-restore --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=lcov -p:Include=[Shane32.ExcelLinq]* -p:CoverletOutput=../../${{ matrix.os }}.lcov.info
+      # ==== code coverage reports (ubuntu-latest only) ====
       - name: Convert coverage report to clover format
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: danielpalme/ReportGenerator-GitHub-Action@4.7.1
         with:
           reports: '${{ matrix.os }}.lcov.info'
           targetdir: '.'
           reporttypes: 'Clover'
-          tag: '${{ github.run_number }}_${{ github.run_id }}'
+          tag: 'test_${{ github.run_number }}'
       - name: Monitor coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: slavcodev/coverage-monitor-action@1.2.0
@@ -57,6 +59,7 @@ jobs:
           threshold_warning: 90
       # https://github.com/marketplace/actions/coveralls-github-action
       - name: Upload coverage to Coveralls
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{secrets.GITHUB_TOKEN }}
