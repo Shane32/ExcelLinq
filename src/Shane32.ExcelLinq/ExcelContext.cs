@@ -341,7 +341,7 @@ namespace Shane32.ExcelLinq
                 return DateTime.FromOADate((double)DefaultReadSerializer(cell, typeof(double))).TimeOfDay;
             }
             if (dataType == typeof(DateTimeOffset)) {
-                return (DateTimeOffset)DefaultReadSerializer(cell, typeof(DateTime));
+                throw new NotSupportedException("DateTimeOffset values are not supported");
             }
             if (dataType == typeof(Uri)) {
                 return new Uri(cell.Text);
@@ -369,7 +369,7 @@ namespace Shane32.ExcelLinq
                 null => null,
                 DateTime dt => dt.ToOADate(),
                 TimeSpan ts => DateTime.FromOADate(0).Add(ts).ToOADate(),
-                DateTimeOffset dto => dto.DateTime.ToOADate(),
+                DateTimeOffset dto => throw new NotSupportedException("DateTimeOffset values are not supported"),
                 Guid guid => guid.ToString(),
                 Uri uri => uri.ToString(),
                 _ => value

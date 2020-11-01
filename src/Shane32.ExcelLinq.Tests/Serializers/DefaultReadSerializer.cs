@@ -149,6 +149,13 @@ namespace Serializers
         }
 
         [TestMethod]
+        public void DateTimeOffsetFromOA()
+        {
+            cell.Value = DateTime.Now.ToOADate();
+            Assert.ThrowsException<NotSupportedException>(() => context.TestDefaultReadSerializer(cell, typeof(DateTimeOffset)));
+        }
+
+        [TestMethod]
         public void DateTimeFromString()
         {
             var dNowStr = DateTime.Now.ToShortDateString();

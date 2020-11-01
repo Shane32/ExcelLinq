@@ -34,6 +34,29 @@ namespace Serializers
         }
 
         [TestMethod]
+        public void DateTimeTest()
+        {
+            var dateTime = DateTime.FromOADate(44137.54);
+            context.TestDefaultWriteSerializer(cell, dateTime);
+            Assert.AreEqual(44137.54, cell.Value);
+        }
+
+        [TestMethod]
+        public void DateTimeOffsetTest()
+        {
+            var dateTime = DateTimeOffset.Now;
+            Assert.ThrowsException<NotSupportedException>(() => context.TestDefaultWriteSerializer(cell, dateTime));
+        }
+
+        [TestMethod]
+        public void TimeSpanOffsetTest()
+        {
+            var timeSpan = TimeSpan.FromMinutes(288);
+            context.TestDefaultWriteSerializer(cell, timeSpan);
+            Assert.AreEqual(0.2, cell.Value);
+        }
+
+        [TestMethod]
         public void GuidTest()
         {
             var guid = Guid.NewGuid();
