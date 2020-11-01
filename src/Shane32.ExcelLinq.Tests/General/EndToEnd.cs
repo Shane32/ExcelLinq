@@ -48,10 +48,11 @@ namespace General
         {
             var xl = new TestFileContext("test.xlsx");
             xl.SerializeToFile("test-out.xlsx");
-            var memStream1 = xl.SerializeToStream();
-            var excelPackage = xl.SerializeToExcelPackage();
-            var memStream2 = new MemoryStream();
-            xl.SerializeToStream(memStream2);
+            xl.SerializeToStream();
+            xl.SerializeToExcelPackage();
+            var xl2 = new TestFileContext("test-out.xlsx");
+            Assert.AreEqual(xl.GetSheet<TestFileContext.Sheet1>().Count, xl2.GetSheet<TestFileContext.Sheet1>().Count);
+            Assert.AreEqual(xl.GetSheet<Class1>().Count, xl2.GetSheet<Class1>().Count);
         }
 
         public void ReadSample1File_test(TestFileContext xl) {
