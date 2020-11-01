@@ -41,13 +41,21 @@ jobs:
       - name: Test solution [Debug]
         run: dotnet test --no-restore --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=lcov -p:Include=[Shane32.ExcelLinq]* -p:CoverletOutput=../../${{ matrix.os }}.lcov.info
       # ==== code coverage reports (ubuntu-latest only) ====
-      - name: Convert coverage report to clover format
+      - name: Convert coverage report to clover & htmlsummary format
         if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: danielpalme/ReportGenerator-GitHub-Action@4.7.1
         with:
           reports: '${{ matrix.os }}.lcov.info'
           targetdir: '.'
-          reporttypes: 'Clover;Html;HtmlSummary'
+          reporttypes: 'Clover;HtmlSummary'
+          tag: 'test_${{ github.run_number }}'
+      - name: Convert coverage report to html
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: danielpalme/ReportGenerator-GitHub-Action@4.7.1
+        with:
+          reports: '${{ matrix.os }}.lcov.info'
+          targetdir: './cloverreport'
+          reporttypes: 'Html'
           tag: 'test_${{ github.run_number }}'
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -56,7 +64,7 @@ jobs:
           path: |
             ${{ matrix.os }}.lcov.info
             Clover.xml
-            index.html
+            cloverreport/**
             summary.html
       - name: Monitor coverage
         if: ${{ matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' }}
