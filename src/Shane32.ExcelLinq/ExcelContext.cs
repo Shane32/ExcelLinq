@@ -37,6 +37,7 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
+        // used by unit tests only
         internal ExcelContext(IExcelModel model)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
@@ -58,7 +59,6 @@ namespace Shane32.ExcelLinq
 
         protected ExcelContext(string filename) : this()
         {
-            if (filename == null) throw new ArgumentNullException(nameof(filename));
             using var stream = new FileStream(filename ?? throw new ArgumentNullException(nameof(filename)), FileMode.Open, FileAccess.Read, FileShare.Read);
             using var package = new ExcelPackage(stream);
             _initialized = false;
@@ -66,15 +66,15 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
-        internal ExcelContext(IExcelModel model, string filename) : this(model)
-        {
-            if (filename == null) throw new ArgumentNullException(nameof(filename));
-            using var stream = new FileStream(filename ?? throw new ArgumentNullException(nameof(filename)), FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var package = new ExcelPackage(stream);
-            _initialized = false;
-            _sheets = InitializeReadFile(package);
-            _initialized = true;
-        }
+        //internal ExcelContext(IExcelModel model, string filename) : this(model)
+        //{
+        //    if (filename == null) throw new ArgumentNullException(nameof(filename));
+        //    using var stream = new FileStream(filename ?? throw new ArgumentNullException(nameof(filename)), FileMode.Open, FileAccess.Read, FileShare.Read);
+        //    using var package = new ExcelPackage(stream);
+        //    _initialized = false;
+        //    _sheets = InitializeReadFile(package);
+        //    _initialized = true;
+        //}
 
         protected ExcelContext(Stream stream) : this()
         {
@@ -85,14 +85,14 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
-        internal ExcelContext(IExcelModel model, Stream stream) : this(model)
-        {
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
-            using var package = new ExcelPackage(stream);
-            _initialized = false;
-            _sheets = InitializeReadFile(package);
-            _initialized = true;
-        }
+        //internal ExcelContext(IExcelModel model, Stream stream) : this(model)
+        //{
+        //    if (stream == null) throw new ArgumentNullException(nameof(stream));
+        //    using var package = new ExcelPackage(stream);
+        //    _initialized = false;
+        //    _sheets = InitializeReadFile(package);
+        //    _initialized = true;
+        //}
 
         protected ExcelContext(ExcelPackage excelPackage) : this()
         {
@@ -101,12 +101,12 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
-        internal ExcelContext(IExcelModel model, ExcelPackage excelPackage) : this(model)
-        {
-            _initialized = false;
-            _sheets = InitializeReadFile(excelPackage);
-            _initialized = true;
-        }
+        //internal ExcelContext(IExcelModel model, ExcelPackage excelPackage) : this(model)
+        //{
+        //    _initialized = false;
+        //    _sheets = InitializeReadFile(excelPackage);
+        //    _initialized = true;
+        //}
 
         private List<IList> InitializeReadFile(ExcelPackage excelFile)
         {
@@ -474,20 +474,24 @@ namespace Shane32.ExcelLinq
             return excelPackage;
         }
 
-        public virtual Stream SerializeToStream()
+        public virtual MemoryStream SerializeToStream()
         {
-            using var excelPackage = SerializeToExcelPackage();
             var stream = new MemoryStream();
-            excelPackage.SaveAs(stream);
+            SerializeToStream(stream);
             stream.Position = 0;
             return stream;
         }
 
-        public virtual void SerializeToFile(string filename)
+        public virtual void SerializeToStream(Stream stream)
         {
             using var excelPackage = SerializeToExcelPackage();
-            using var stream = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
             excelPackage.SaveAs(stream);
+        }
+
+        public virtual void SerializeToFile(string filename)
+        {
+            using var stream = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            SerializeToStream(stream);
         }
     }
 

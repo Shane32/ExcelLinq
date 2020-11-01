@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
@@ -12,6 +13,14 @@ namespace General
     [TestClass]
     public class EndToEnd
     {
+        [TestMethod]
+        public void NullConstructorsThrow()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => new TestFileContext((string)null));
+            Assert.ThrowsException<ArgumentNullException>(() => new TestFileContext((Stream)null));
+            Assert.ThrowsException<ArgumentNullException>(() => new TestFileContext((ExcelPackage)null));
+        }
+
         [TestMethod]
         public void ReadSample1File()
         {
@@ -28,10 +37,21 @@ namespace General
         }
 
         [TestMethod]
+        public void ReadSample1File_3()
+        {
+            var xl = new TestFileContext(new ExcelPackage(new FileInfo("test.xlsx")));
+            ReadSample1File_test(xl);
+        }
+
+        [TestMethod]
         public void ReadAndWrite()
         {
             var xl = new TestFileContext("test.xlsx");
             xl.SerializeToFile("test-out.xlsx");
+            var memStream1 = xl.SerializeToStream();
+            var excelPackage = xl.SerializeToExcelPackage();
+            var memStream2 = new MemoryStream();
+            xl.SerializeToStream(memStream2);
         }
 
         public void ReadSample1File_test(TestFileContext xl) {

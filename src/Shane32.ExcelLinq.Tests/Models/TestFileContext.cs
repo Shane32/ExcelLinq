@@ -9,6 +9,7 @@ namespace Shane32.ExcelLinq.Tests.Models
     {
         public TestFileContext(System.IO.Stream stream) : base(stream) { }
         public TestFileContext(string filename) : base(filename) { }
+        public TestFileContext(ExcelPackage excelPackage) : base(excelPackage) { }
 
         protected override void OnModelCreating(ExcelModelBuilder builder)
         {
