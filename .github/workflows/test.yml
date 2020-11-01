@@ -47,7 +47,7 @@ jobs:
         with:
           reports: '${{ matrix.os }}.lcov.info'
           targetdir: '.'
-          reporttypes: 'Clover;HtmlSummary'
+          reporttypes: 'Clover;Html'
           tag: 'test_${{ github.run_number }}'
       - name: Monitor coverage
         if: ${{ matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' }}
