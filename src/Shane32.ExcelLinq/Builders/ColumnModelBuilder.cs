@@ -28,8 +28,11 @@ namespace Shane32.ExcelLinq.Builders
             if (_member is PropertyInfo propertyInfo) {
                 if (!propertyInfo.CanRead) throw new ArgumentOutOfRangeException(nameof(memberExpression), "This property cannot be read from");
                 if (!propertyInfo.CanWrite) throw new ArgumentOutOfRangeException(nameof(memberExpression), "This property cannot be written from");
+            // A MemberExpression can only represent a property or a field
+            /*
             } else if (!(_member is FieldInfo)) {
                 throw new ArgumentOutOfRangeException(nameof(memberExpression), "This member is not a property or field");
+            */
             }
             if (sheetModelBuilder._columns.Any(x => x.Member == _member))
                 throw new InvalidOperationException("This column has already been added to the sheet");
