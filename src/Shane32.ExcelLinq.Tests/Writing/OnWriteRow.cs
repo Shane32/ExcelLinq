@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ModelInterfaces;
 using Moq;
 using Moq.Protected;
 using OfficeOpenXml;
 using Shane32.ExcelLinq.Builders;
+using Shane32.ExcelLinq.Models;
 using Shane32.ExcelLinq.Tests.Models;
 
 namespace Writing
@@ -153,6 +157,25 @@ namespace Writing
             });
         }
 
-        
+        [TestMethod]
+        public void InvalidColumnMemberThrows()
+        {
+            var mockColumn = new Mock<IColumnModel>();
+            mockColumn.SetupGet(x => x.Member).Returns((MemberInfo)null);
+            var columns = new List<IColumnModel> {
+                mockColumn.Object
+            };
+            var mockColumnLookup = new Mock<IColumnModelLookup>();
+            mockColumnLookup.SetupGet(x => x.Count).Returns(1);
+            mockColumnLookup.Setup(x => x.GetEnumerator()).Returns(() => columns.GetEnumerator());
+            mockColumnLookup.Setup(x => x[It.Is<int>(y => y == 0)]).Returns(() => mockColumn.Object);
+            var mockSheetModel = new Mock<Shane32.ExcelLinq.Models.ISheetModel>();
+            mockSheetModel.SetupGet(x => x.Type).Returns(typeof(Class1));
+            mockSheetModel.SetupGet(x => x.Columns).Returns(mockColumnLookup.Object);
+            var e = Assert.ThrowsException<InvalidOperationException>(() => {
+                context.TestOnWriteRow(sheet.Cells[1, 1, 1, 1], mockSheetModel.Object, new Class1());
+            });
+            Assert.AreEqual("Column member expression is not a field or property", e.Message);
+        }
     }
 }
