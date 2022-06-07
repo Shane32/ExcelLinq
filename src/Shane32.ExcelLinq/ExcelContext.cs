@@ -31,7 +31,8 @@ namespace Shane32.ExcelLinq
                 var sheet = Model.Sheets[i];
                 _sheets.Add(CreateListForSheet(sheet.Type));
                 _sheetNameLookup.Add(sheet.Name, i);
-                foreach (var sheetName in sheet.AlternateNames) _sheetNameLookup.Add(sheetName, i);
+                foreach (var sheetName in sheet.AlternateNames)
+                    _sheetNameLookup.Add(sheetName, i);
                 _typeLookup.Add(sheet.Type, i);
             }
             _initialized = true;
@@ -40,7 +41,8 @@ namespace Shane32.ExcelLinq
         // used by unit tests only
         internal ExcelContext(IExcelModel model)
         {
-            if (model == null) throw new ArgumentNullException(nameof(model));
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
             _model = model;
             _sheets = new List<IList>(Model.Sheets.Count);
             _sheetNameLookup = new Dictionary<string, int>(Model.Sheets.Count);
@@ -49,7 +51,8 @@ namespace Shane32.ExcelLinq
                 var sheet = Model.Sheets[i];
                 _sheets.Add(CreateListForSheet(sheet.Type));
                 _sheetNameLookup.Add(sheet.Name, i);
-                foreach (var sheetName in sheet.AlternateNames) _sheetNameLookup.Add(sheetName, i);
+                foreach (var sheetName in sheet.AlternateNames)
+                    _sheetNameLookup.Add(sheetName, i);
                 _typeLookup.Add(sheet.Type, i);
             }
             _initialized = true;
@@ -78,7 +81,8 @@ namespace Shane32.ExcelLinq
 
         protected ExcelContext(Stream stream) : this()
         {
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
             using var package = new ExcelPackage(stream);
             _initialized = false;
             _sheets = InitializeReadFile(package);
@@ -110,7 +114,8 @@ namespace Shane32.ExcelLinq
 
         private List<IList> InitializeReadFile(ExcelPackage excelFile)
         {
-            if (excelFile == null) throw new ArgumentNullException(nameof(excelFile));
+            if (excelFile == null)
+                throw new ArgumentNullException(nameof(excelFile));
             var data = OnReadFile(excelFile.Workbook);
             if (data == null)
                 throw new InvalidOperationException("No data returned from OnReadFile");
@@ -147,7 +152,8 @@ namespace Shane32.ExcelLinq
         /// </summary>
         protected virtual List<IList> OnReadFile(ExcelWorkbook workbook)
         {
-            if (workbook == null) throw new ArgumentNullException(nameof(workbook));
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
             var sheets = new List<IList>(new IList[Model.Sheets.Count]);
 
             var sheetArray = Model.Sheets.ToList();
@@ -156,18 +162,19 @@ namespace Shane32.ExcelLinq
                     var worksheet = workbook.Worksheets[i];
                     var sheetModel = Model.Sheets[i];
                     var sheetData = OnReadSheet(worksheet, sheetModel);
-                    if (sheetData == null) throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
+                    if (sheetData == null)
+                        throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
                     sheets[i] = sheetData;
                 }
-            }
-            else {
+            } else {
                 foreach (var workSheet in workbook.Worksheets) {
                     if (Model.Sheets.TryGetValue(workSheet.Name, out var sheetModel)) {
                         var sheetIndex = sheetArray.IndexOf(sheetModel);
                         if (sheets[sheetIndex] != null)
                             throw new DuplicateSheetException(sheetModel.Name);
                         var sheetData = OnReadSheet(workSheet, sheetModel);
-                        if (sheetData == null) throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
+                        if (sheetData == null)
+                            throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
                         sheets[sheetIndex] = sheetData;
                     }
                 }
@@ -193,8 +200,10 @@ namespace Shane32.ExcelLinq
         /// </summary>
         protected virtual IList OnReadSheet(ExcelWorksheet worksheet, ISheetModel model)
         {
-            if (worksheet == null) throw new ArgumentNullException(nameof(worksheet));
-            if (model == null) throw new ArgumentNullException(nameof(model));
+            if (worksheet == null)
+                throw new ArgumentNullException(nameof(worksheet));
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
             ExcelRange dataRange = (model.ReadRangeLocator ?? DefaultReadRangeLocator)(worksheet);
             if (dataRange == null) {
                 //no data on sheet
@@ -235,7 +244,8 @@ namespace Shane32.ExcelLinq
             for (int row = firstRow; row <= lastRow; row++) {
                 var range = worksheet.Cells[row, firstCol, row, firstCol + columns - 1];
                 var obj = OnReadRow(range, model, columnMapping);
-                if (obj != null) data.Add(obj);
+                if (obj != null)
+                    data.Add(obj);
             }
 
             return data;
@@ -246,14 +256,19 @@ namespace Shane32.ExcelLinq
         /// </summary>
         protected virtual object OnReadRow(ExcelRange range, ISheetModel model, IColumnModel[] columnMapping)
         {
-            if (range == null) throw new ArgumentNullException(nameof(range));
-            if (model == null) throw new ArgumentNullException(nameof(range));
-            if (columnMapping == null) throw new ArgumentNullException(nameof(columnMapping));
+            if (range == null)
+                throw new ArgumentNullException(nameof(range));
+            if (model == null)
+                throw new ArgumentNullException(nameof(range));
+            if (columnMapping == null)
+                throw new ArgumentNullException(nameof(columnMapping));
             var firstCol = range.Start.Column;
             var row = range.Start.Row;
             var columns = range.Columns;
-            if (range.Rows != 1) throw new ArgumentOutOfRangeException(nameof(range), "Range must represent a single row of data");
-            if (columns != columnMapping.Length) throw new ArgumentOutOfRangeException(nameof(columnMapping), "Number of columns in range does not match size of columnMapping array");
+            if (range.Rows != 1)
+                throw new ArgumentOutOfRangeException(nameof(range), "Range must represent a single row of data");
+            if (columns != columnMapping.Length)
+                throw new ArgumentOutOfRangeException(nameof(columnMapping), "Number of columns in range does not match size of columnMapping array");
             var obj = Activator.CreateInstance(model.Type);
             if (range.Any(x => x.Value != null)) {
                 for (int colIndex = 0; colIndex < columns; colIndex++) {
@@ -262,7 +277,8 @@ namespace Shane32.ExcelLinq
                     if (columnModel != null) {
                         var cell = range[row, col]; // note that range[] resets range.Address to equal the new address
                         if (cell.Value == null) {
-                            if (!columnModel.Optional) throw new ColumnDataMissingException(columnModel.Name, model.Name);
+                            if (!columnModel.Optional)
+                                throw new ColumnDataMissingException(columnModel.Name, model.Name);
                         } else {
                             object value;
                             try {
@@ -271,8 +287,7 @@ namespace Shane32.ExcelLinq
                                 } else {
                                     value = DefaultReadSerializer(cell, columnModel.Type);
                                 }
-                            }
-                            catch (Exception e) {
+                            } catch (Exception e) {
                                 throw new ParseDataException(cell.Address, columnModel.Name, model.Name, e);
                             }
                             if (value != null) {
@@ -307,7 +322,8 @@ namespace Shane32.ExcelLinq
         protected virtual ExcelRange DefaultReadRangeLocator(ExcelWorksheet worksheet)
         {
             var dimension = worksheet.Dimension;
-            if (dimension == null) return null; // no cells
+            if (dimension == null)
+                return null; // no cells
             return worksheet.Cells[dimension.Start.Row, dimension.Start.Column, dimension.End.Row, dimension.End.Column];
         }
 
@@ -328,16 +344,20 @@ namespace Shane32.ExcelLinq
             if (dataType.IsGenericType && dataType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
                 return DefaultReadSerializer(cell, Nullable.GetUnderlyingType(dataType));
             }
-            if (cell.Value.GetType() == dataType) return cell.Value;
+            if (cell.Value.GetType() == dataType)
+                return cell.Value;
             if (dataType == typeof(string))
                 return cell.Text;
             if (dataType == typeof(DateTime)) {
-                if (cell.Value is string str) return DateTime.Parse(str);
+                if (cell.Value is string str)
+                    return DateTime.Parse(str);
                 return DateTime.FromOADate((double)DefaultReadSerializer(cell, typeof(double)));
             }
             if (dataType == typeof(TimeSpan)) {
-                if (cell.Value is DateTime dt) return dt.TimeOfDay;
-                if (cell.Value is string str) return TimeSpan.Parse(str);
+                if (cell.Value is DateTime dt)
+                    return dt.TimeOfDay;
+                if (cell.Value is string str)
+                    return TimeSpan.Parse(str);
                 return DateTime.FromOADate((double)DefaultReadSerializer(cell, typeof(double))).TimeOfDay;
             }
             if (dataType == typeof(DateTimeOffset)) {
@@ -353,9 +373,11 @@ namespace Shane32.ExcelLinq
                 if (cell.Value is string str) {
                     switch (str.ToLower()) {
                         case "y":
-                        case "yes": return true;
+                        case "yes":
+                            return true;
                         case "n":
-                        case "no": return false;
+                        case "no":
+                            return false;
                     }
                 }
             }
@@ -376,18 +398,26 @@ namespace Shane32.ExcelLinq
                 _ => value
             };
             */
-            if (value == null) cell.Value = null;
-            else if (value is DateTime dt) cell.Value = dt.ToOADate();
-            else if (value is TimeSpan ts) cell.Value = DateTime.FromOADate(0).Add(ts).ToOADate();
-            else if (value is DateTimeOffset) throw new NotSupportedException("DateTimeOffset values are not supported");
-            else if (value is Guid guid) cell.Value = guid.ToString();
-            else if (value is Uri uri) cell.Value = uri.ToString();
-            else cell.Value = value;
+            if (value == null)
+                cell.Value = null;
+            else if (value is DateTime dt)
+                cell.Value = dt.ToOADate();
+            else if (value is TimeSpan ts)
+                cell.Value = DateTime.FromOADate(0).Add(ts).ToOADate();
+            else if (value is DateTimeOffset)
+                throw new NotSupportedException("DateTimeOffset values are not supported");
+            else if (value is Guid guid)
+                cell.Value = guid.ToString();
+            else if (value is Uri uri)
+                cell.Value = uri.ToString();
+            else
+                cell.Value = value;
         }
 
         protected virtual void OnWriteFile(ExcelWorkbook workbook)
         {
-            if (workbook == null) throw new ArgumentNullException(nameof(workbook));
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
             var sheets = GetSheetData();
             for (int i = 0; i < sheets.Count; i++) {
                 var sheetModel = Model.Sheets[i];
@@ -398,16 +428,21 @@ namespace Shane32.ExcelLinq
 
         protected virtual void OnWriteSheet(ExcelWorksheet worksheet, ISheetModel model, IList data)
         {
-            if (worksheet == null) throw new ArgumentNullException(nameof(worksheet));
-            if (model == null) throw new ArgumentNullException(nameof(model));
-            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (worksheet == null)
+                throw new ArgumentNullException(nameof(worksheet));
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
             ExcelRange start = (model.WriteRangeLocator ?? DefaultWriteRangeLocator)(worksheet);
-            if (start == null) throw new InvalidOperationException("No write range specified");
+            if (start == null)
+                throw new InvalidOperationException("No write range specified");
             var headerRow = start.Start.Row;
             var dataRow = headerRow + 1;
             var firstCol = start.Start.Column;
             var columns = model.Columns.Count;
-            if (columns == 0) return;
+            if (columns == 0)
+                return;
             for (int i = 0; i < columns; i++) {
                 var columnModel = model.Columns[i];
                 var col = firstCol + i;
@@ -437,10 +472,14 @@ namespace Shane32.ExcelLinq
             model.WritePolisher?.Invoke(worksheet, allCells);
         }
 
-        protected virtual void OnWriteRow(ExcelRange range, ISheetModel model, object data) {
-            if (range == null) throw new ArgumentNullException(nameof(range));
-            if (model == null) throw new ArgumentNullException(nameof(model));
-            if (data == null) throw new ArgumentNullException(nameof(data));
+        protected virtual void OnWriteRow(ExcelRange range, ISheetModel model, object data)
+        {
+            if (range == null)
+                throw new ArgumentNullException(nameof(range));
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
             if (!model.Type.IsAssignableFrom(data.GetType()))
                 throw new ArgumentOutOfRangeException("Data type does not match column type");
             var columns = model.Columns.Count;
@@ -475,7 +514,8 @@ namespace Shane32.ExcelLinq
 
         public List<T> GetSheet<T>()
         {
-            if (!_initialized) throw new InvalidOperationException();
+            if (!_initialized)
+                throw new InvalidOperationException();
             return (List<T>)_sheets[_typeLookup[typeof(T)]];
         }
 
@@ -505,7 +545,88 @@ namespace Shane32.ExcelLinq
             using var stream = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
             SerializeToStream(stream);
         }
+
+        public virtual string SerializeToCsv()
+        {
+            var sw = new StringWriter();
+            SerializeToCsv(sw);
+            return sw.ToString();
+        }
+
+        public virtual void SerializeToCsv(TextWriter textWriter)
+        {
+            if (_sheets.Count != 1)
+                throw new InvalidOperationException("This workbook must contain only a single sheet.");
+            var package = SerializeToExcelPackage();
+            var sheet = package.Workbook.Worksheets[0];
+            var columns = sheet.Dimension?.Columns ?? 0;
+            var rows = sheet.Dimension?.Rows ?? 0;
+            var sb = new System.Text.StringBuilder();
+            var data = new List<string>();
+            package.Compatibility.IsWorksheets1Based = false;
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < columns; j++) {
+                    var cell = sheet.Cells[i, j];
+                    if (cell == null)
+                        data.Add("");
+                    else
+                        data.Add(FormatCellForCsv(cell));
+                }
+                textWriter.WriteLine(string.Join(",", data));
+                data.Clear();
+            }
+        }
+
+        protected string FormatCellForCsv(ExcelRange cell)
+        {
+            if (cell.Value == null)
+                return "";
+            if (cell.Value is string stringValue)
+                return "\"" + stringValue.Replace("\"", "\"\"").Replace("\r", "").Replace("\n", "") + "\"";
+            if (cell.Value is DateTimeOffset dateOffsetValue)
+                throw new NotSupportedException("DateTimeOffset not supported");
+            var formatString = cell.Style?.Numberformat?.Format ?? "";
+            if (cell.Value is DateTime dateValue) {
+                if (formatString == "")
+                    return dateValue.ToString();
+                else
+                    return dateValue.ToString(ConvertDateFormat(formatString));
+            }
+            var numberValue = (double)Convert.ChangeType(cell.Value, typeof(double));
+            var formatStrings = formatString.Split(';');
+            var positiveFormat = formatStrings.Length > 0 ? formatStrings[0] : "";
+            var negativeFormat = formatStrings.Length > 1 ? formatStrings[1] : "";
+            var zeroFormat = formatStrings.Length > 2 ? formatStrings[2] : "";
+            negativeFormat = negativeFormat == "" ? positiveFormat : negativeFormat;
+            zeroFormat = zeroFormat == "" ? positiveFormat : zeroFormat;
+            if (numberValue > 0 || double.IsPositiveInfinity(numberValue) || double.IsNaN(numberValue)) {
+                if (positiveFormat == "")
+                    return numberValue.ToString();
+                else
+                    return numberValue.ToString(ConvertNumberFormat(positiveFormat));
+            } else if (numberValue < 0 || double.IsNegativeInfinity(numberValue)) {
+                if (negativeFormat == "")
+                    return numberValue.ToString();
+                else
+                    return numberValue.ToString(ConvertNumberFormat(negativeFormat));
+            } else {
+                if (zeroFormat == "")
+                    return numberValue.ToString();
+                else
+                    return numberValue.ToString(ConvertNumberFormat(zeroFormat));
+            }
+
+            string ConvertNumberFormat(string numberFormat)
+            {
+                return numberFormat;
+            }
+
+            string ConvertDateFormat(string dateFormat)
+            {
+                return dateFormat;
+            }
+        }
     }
 
-    
+
 }
