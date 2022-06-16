@@ -32,7 +32,8 @@ namespace Shane32.ExcelLinq
                 _sheets.Add(CreateListForSheet(sheet.Type));
                 _sheetNameLookup.Add(sheet.Name, i);
                 foreach (var sheetName in sheet.AlternateNames) _sheetNameLookup.Add(sheetName, i);
-                _typeLookup.Add(sheet.Type, i);
+                if (!_typeLookup.ContainsKey(sheet.Type))
+                    _typeLookup.Add(sheet.Type, i);
             }
             _initialized = true;
         }
@@ -50,7 +51,8 @@ namespace Shane32.ExcelLinq
                 _sheets.Add(CreateListForSheet(sheet.Type));
                 _sheetNameLookup.Add(sheet.Name, i);
                 foreach (var sheetName in sheet.AlternateNames) _sheetNameLookup.Add(sheetName, i);
-                _typeLookup.Add(sheet.Type, i);
+                if (!_typeLookup.ContainsKey(sheet.Type))
+                    _typeLookup.Add(sheet.Type, i);
             }
             _initialized = true;
         }
@@ -477,6 +479,15 @@ namespace Shane32.ExcelLinq
         {
             if (!_initialized) throw new InvalidOperationException();
             return (List<T>)_sheets[_typeLookup[typeof(T)]];
+        }
+
+        public List<T> GetSheet<T>(string name)
+        {
+            if (!_initialized)
+                throw new InvalidOperationException();
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+            return (List<T>)_sheets[_sheetNameLookup[name]];
         }
 
         public virtual ExcelPackage SerializeToExcelPackage()
