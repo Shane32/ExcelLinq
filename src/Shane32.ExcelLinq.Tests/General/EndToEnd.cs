@@ -170,5 +170,49 @@ namespace General
             Assert.AreEqual(true, sheet1Data[1].BooleanColumn);
             mock.Verify();
         }
+
+        [TestMethod]
+        public void ReadWriteFileWithSimilarSheets()
+        {
+            var file = new TestFileContextSimilarSheets();
+            Assert.AreEqual(file.GetSheet<Class1>(), file.GetSheet<Class1>("Sheet1"));
+            file.GetSheet<Class1>("Sheet1").Add(new Class1 { StringColumn = "a", IntColumn = 1 });
+            file.GetSheet<Class1>("Sheet1").Add(new Class1 { StringColumn = "b", IntColumn = 2 });
+            file.GetSheet<Class1>("Sheet2").Add(new Class1 { StringColumn = "c", IntColumn = 3 });
+            file.GetSheet<Class1>("Sheet3").Add(new Class1 { StringColumn = "d", IntColumn = 4 });
+            var stream = file.SerializeToStream();
+            file = new TestFileContextSimilarSheets(stream);
+            Assert.AreEqual(file.GetSheet<Class1>(), file.GetSheet<Class1>("Sheet1"));
+            var sheet1 = file.GetSheet<Class1>("Sheet1");
+            Assert.AreEqual(sheet1.Count, 2);
+            Assert.AreEqual(sheet1[0].StringColumn, "a");
+            Assert.AreEqual(sheet1[0].IntColumn, 0);
+            Assert.AreEqual(sheet1[1].StringColumn, "b");
+            Assert.AreEqual(sheet1[1].IntColumn, 0);
+            var sheet2 = file.GetSheet<Class1>("Sheet2");
+            Assert.AreEqual(sheet2.Count, 1);
+            Assert.AreEqual(sheet2[0].StringColumn, "c");
+            Assert.AreEqual(sheet2[0].IntColumn, 0);
+            var sheet3 = file.GetSheet<Class1>("Sheet3");
+            Assert.AreEqual(sheet3.Count, 1);
+            Assert.AreEqual(sheet3[0].StringColumn, "d");
+            Assert.AreEqual(sheet3[0].IntColumn, 4);
+        }
+
+        private class TestFileContextSimilarSheets : ExcelContext
+        {
+            public TestFileContextSimilarSheets() : base() { }
+            public TestFileContextSimilarSheets(Stream stream) : base(stream) { }
+            protected override void OnModelCreating(ExcelModelBuilder modelBuilder)
+            {
+                var sheet1 = modelBuilder.Sheet<Class1>("Sheet1");
+                sheet1.Column(x => x.StringColumn);
+                var sheet2 = modelBuilder.Sheet<Class1>("Sheet2");
+                sheet2.Column(x => x.StringColumn);
+                var sheet3 = modelBuilder.Sheet<Class1>("Sheet3");
+                sheet3.Column(x => x.StringColumn);
+                sheet3.Column(x => x.IntColumn);
+            }
+        }
     }
 }
