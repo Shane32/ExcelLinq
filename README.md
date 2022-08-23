@@ -15,9 +15,9 @@ including formatting of an Excel workbook, and `EndToEnd.ReadAndWrite` for a sam
 
 ## Basic usage
 
-Below is a sample of how to use the context to load an Excel workbook, and then enumerate the data contained within.
+Below is a sample of how to load an Excel workbook and enumerate the data contained within.
 
-1. Set up your data model which should match the Excel workbook you want to load.
+1. Set up your data model which should match the Excel worksheet you want to load.
 
 ```csharp
 public class Sheet1
@@ -41,7 +41,7 @@ public class TestFileContext : ExcelContext
     public TestFileContext(string filename) : base(filename) { }
     public TestFileContext(ExcelPackage excelPackage) : base(excelPackage) { }
 
-    // in order to write files, you'll need a default constructor
+    // in order to write new files, you'll need a default constructor
     public TestFileContext() : base() { }
 
     // define an easy way to access the sheet1 table
@@ -105,11 +105,12 @@ public class TestFileContext : ExcelContext
     public TestFileContext(string filename) : base(filename) { }
     public TestFileContext(ExcelPackage excelPackage) : base(excelPackage) { }
 
-    // in order to write files, you'll need a default constructor
+    // in order to write new files, you'll need a default constructor
     public TestFileContext() : base() { }
 
-    // easy way to access the sheet by name
+    // define an easy way to access the sheets by name
     public List<Sheet1> Sheet1 => GetSheet<Sheet1>();
+    public List<MyClass2> Sheet2 => GetSheet<MyClass2>();
         
     protected override void OnModelCreating(ExcelModelBuilder builder)
     {
