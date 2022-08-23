@@ -13,6 +13,9 @@ sheets, or to append totals.  Sheets and columns can match based on name when de
 The project includes extensive testing for its codebase; please see `TestFileContext` for a sample of a context definition
 including formatting of an Excel workbook, and `EndToEnd.ReadAndWrite` for a sample of reading a file and writing it to another file.
 
+This project uses the NuGet package 'EPPlus-LGPL' [![Nuget](https://img.shields.io/nuget/v/EPPlus-LGPL)](https://www.nuget.org/packages/EPPlus-LGPL)
+to read and write Excel files.  Any capabilities of EPPlus can be used to extend the functionality within this project.
+
 ## Basic usage
 
 Below is a sample of how to load an Excel workbook and enumerate the data contained within.
