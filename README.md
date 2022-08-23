@@ -234,6 +234,9 @@ public class TestFileContext : ExcelContext
 }
 ```
 
+Reading and writing is as simple as before; just the context has changed to provide more
+formatting to the written Excel file.
+
 ## Credits
 
 Glory to Jehovah, Lord of Lords and King of Kings, creator of Heaven and Earth, who through his Son Jesus Christ,
