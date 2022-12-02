@@ -1,0 +1,10 @@
+﻿IntColumn,FloatColumn,DoubleColumn,StringColumn,BooleanColumn,DateTimeColumn,TimespanColumn,UriColumn,GuidColumn,NullableIntColumn
+1,1,1,test,TRUE,2-Aug,02:00 PM,http://localhost/test,f1dc7e7d-d63e-4279-8dfd-cecb6e26cda8,3
+1.1,1.1,1.1,test2,FALSE,8/1/2020,14:00,http://localhost/help,89892480-4179-42c7-9e2f-e0bb1094dd6b,3.1
+1,1.1,1.1,test2,true,8/3/20,14:00,http://localhost/help,89892480-4179-42c7-9e2f-e0bb1094dd6b,3
+1.1,1.1,1.1,test2,yes,8/1/20 2:30 PM,02:34,http://localhost/help,89892480-4179-42c7-9e2f-e0bb1094dd6b,
+1.1,1.1,1.1,test2,NO,8/1/20 2:30 PM,02:34,http://localhost/help,89892480-4179-42c7-9e2f-e0bb1094dd6b,
+1.1,1.1,1.1,test2,y,8/1/20 2:30 PM,02:34,http://localhost/help,89892480-4179-42c7-9e2f-e0bb1094dd6b,
+1.1,1.1,1.1,test2,N,8/1/20 2:30 PM,02:34,http://localhost/help,89892480-4179-42c7-9e2f-e0bb1094dd6b,
+1.1,1.1,1.1,test2,1,8/1/20 2:30 PM,02:34,http://localhost/help,89892480-4179-42c7-9e2f-e0bb1094dd6b,
+1.1,1.1,1.1,test2,0,8/1/20 2:30 PM,02:34,http://localhost/help,89892480-4179-42c7-9e2f-e0bb1094dd6b,

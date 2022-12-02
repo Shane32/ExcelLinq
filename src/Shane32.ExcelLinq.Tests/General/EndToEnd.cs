@@ -21,6 +21,15 @@ namespace General
             Assert.ThrowsException<ArgumentNullException>(() => new TestFileContext((ExcelPackage)null));
         }
 
+
+        [TestMethod]
+        public void ReadSampleCsvFile()
+        {
+            using var stream = new System.IO.FileStream("test.csv", System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+            var xl = new TestFileContext(stream);
+            ReadSample1File_test(xl);
+        }
+
         [TestMethod]
         public void ReadSample1File()
         {

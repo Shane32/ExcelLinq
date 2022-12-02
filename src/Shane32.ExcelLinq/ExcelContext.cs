@@ -76,9 +76,26 @@ namespace Shane32.ExcelLinq
         //    _initialized = true;
         //}
 
+        protected ExcelContext(Stream stream, string extensionType) : this()
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+            if(extensionType == ".csv") {
+                var packaget = new ExcelPackage();
+                _initialized = false;
+                _sheets = OnReadCSVFile(packaget.Workbook, stream );
+                _initialized = true;
+            } else {
+                using var package = new ExcelPackage(stream);
+                _initialized = false;
+                _sheets = InitializeReadFile(package);
+                _initialized = true;
+            }
+        }
         protected ExcelContext(Stream stream) : this()
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
+            
             using var package = new ExcelPackage(stream);
             _initialized = false;
             _sheets = InitializeReadFile(package);
@@ -107,6 +124,7 @@ namespace Shane32.ExcelLinq
         //    _sheets = InitializeReadFile(excelPackage);
         //    _initialized = true;
         //}
+
 
         private List<IList> InitializeReadFile(ExcelPackage excelFile)
         {
@@ -139,6 +157,50 @@ namespace Shane32.ExcelLinq
         }
 
         protected abstract void OnModelCreating(ExcelModelBuilder modelBuilder);
+
+
+        protected virtual List<IList> OnReadCSVFile(ExcelWorkbook workbook, Stream stream)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+            var sheets = new List<IList>(new IList[Model.Sheets.Count]);
+
+            var sheetArray = Model.Sheets.ToList();
+            //if (Model.IgnoreSheetNames) {
+            //    for (var i = 0; i < workbook.Worksheets.Count && i < sheetArray.Count; i++) {
+            //        var worksheet = workbook.Worksheets[i];
+            //        var sheetModel = Model.Sheets[i];
+            //        var sheetData = OnReadSheet(worksheet, sheetModel);
+            //        if (sheetData == null)
+            //            throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
+            //        sheets[i] = sheetData;
+            //    }
+            //} else{
+                //foreach (var workSheet in workbook.Worksheets) {
+                //    if (Model.Sheets.TryGetValue(workSheet.Name, out var sheetModel)) {
+                //        var sheetIndex = sheetArray.IndexOf(sheetModel);
+                //        if (sheets[sheetIndex] != null)
+                //            throw new DuplicateSheetException(sheetModel.Name);
+                //        var sheetData = OnReadSheet(workSheet, sheetModel);
+                //        if (sheetData == null)
+                //            throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
+                //        sheets[sheetIndex] = sheetData;
+                //    }
+                //}
+            //}
+
+            for (int i = 0; i < Model.Sheets.Count; i++) {
+                if (sheets[i] == null) {
+                    var sheetModel = Model.Sheets[i];
+                    if (sheetModel.Optional)
+                        sheets[i] = CreateListForSheet(sheetModel.Type);
+                    else
+                        throw new SheetMissingException(sheetModel.Name);
+                }
+            }
+
+            return sheets;
+        }
 
         /// <summary>
         /// Parses an <see cref="ExcelPackage"/> and returns all of the data within all the worksheets.
@@ -185,6 +247,9 @@ namespace Shane32.ExcelLinq
 
             return sheets;
         }
+
+
+
 
         /// <summary>
         /// Reads a worksheet and returns a set of <see cref="List{T}"/> of the entries.

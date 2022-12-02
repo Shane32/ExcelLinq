@@ -14,6 +14,7 @@ namespace Shane32.ExcelLinq.Tests.Models
         protected override void OnModelCreating(ExcelModelBuilder builder)
         {
             Action<ExcelRange> headerFormatter = range => {
+                
                 range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 range.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
             };
@@ -62,11 +63,11 @@ namespace Shane32.ExcelLinq.Tests.Models
             sheet1.WriteRangeLocator(worksheet => worksheet.Cells[3, 1]);
             sheet1.WritePolisher((worksheet, range) => {
                 worksheet.Calculate();
-                for (int col = 1; col <= worksheet.Dimension.End.Column; col++) {
-                    var column = worksheet.Column(col);
-                    column.AutoFit();
-                    column.Width *= 1.2;
-                }
+                //for (int col = 1; col <= worksheet.Dimension.End.Column; col++) {
+                //    var column = worksheet.Column(col);
+                //    column.AutoFit();
+                //    column.Width *= 1.2;
+                //}
                 worksheet.Cells[1, 1].Value = "This is a test header";
             });
 
