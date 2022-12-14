@@ -110,6 +110,8 @@ namespace Shane32.ExcelLinq
             var coltt = sheet1.Columns.FirstOrDefault();
             var qqq = sheet1.Columns.Select(x => x.AlternateNames);
             var ggg = sheet1.Columns.Select(x => x.Name);
+
+
             var alts = sheet1.AlternateNames;
             var sheet = _sheets.FirstOrDefault();
             
@@ -117,7 +119,45 @@ namespace Shane32.ExcelLinq
 
             PropertyInfo[] propertyInfos;
             propertyInfos = tt.GetProperties();
-                                                          
+
+            using (var allSalesDbPartsParser = new TextFieldParser(stream)) {
+                //allEbayListingsParser.CommentTokens = new string[] { "#" };
+                allSalesDbPartsParser.SetDelimiters(new string[] { "," });
+                allSalesDbPartsParser.HasFieldsEnclosedInQuotes = true;
+
+                //skip random line if junk
+                allSalesDbPartsParser.ReadLine();
+
+                // Skip the row with the column names
+                //var cols11 = allSalesDbPartsParser.ReadFields();
+                var cols = allSalesDbPartsParser.ReadFields();
+                var skuIndex = 0;
+                var qtyIndex = 0;
+                for (var i = 0; i < cols.Count(); i++) {
+                    var col = cols[i].ToLower();
+                    if (col == ("Custom label (SKU)").ToLower()) {
+                        skuIndex = i;
+                    }
+
+                    if (col == ("Available quantity").ToLower()) {
+                        qtyIndex = i;
+                    }
+                }
+
+
+                while (!allSalesDbPartsParser.EndOfData) {
+                    var part = new EbayInput();
+                    string[] fields = allSalesDbPartsParser.ReadFields();
+                    part.Sku = fields[skuIndex];
+                    part.Quantity = decimal.Parse(fields[qtyIndex]);
+                    //part.Sku = fields[10];
+                    //part.Quantity = decimal.Parse(fields[7]);
+
+
+                    EbayInputs.Add(part);
+                }
+            }
+
         }
         //internal ExcelContext(IExcelModel model, ExcelPackage excelPackage) : this(model)
         //{
