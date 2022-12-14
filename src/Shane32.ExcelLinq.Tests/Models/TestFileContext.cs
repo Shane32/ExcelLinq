@@ -7,6 +7,7 @@ namespace Shane32.ExcelLinq.Tests.Models
 {
     public class TestFileContext : ExcelContext
     {
+        public TestFileContext() : base() { }
         public TestFileContext(System.IO.Stream stream) : base(stream) { }
         public TestFileContext(string filename) : base(filename) { }
         public TestFileContext(ExcelPackage excelPackage) : base(excelPackage) { }
@@ -20,7 +21,7 @@ namespace Shane32.ExcelLinq.Tests.Models
             };
             Action<ExcelRange> numberFormatter = range => range.Style.Numberformat.Format = "#,##0.00";
             var sheet1 = builder.Sheet<Sheet1>();
-            sheet1.Column(x => x.Date)
+            sheet1.Column(x => x.Date).AlternateName("its a date")
                 .HeaderFormatter(headerFormatter)
                 .ColumnFormatter(range => range.Style.Numberformat.Format = "MM/dd/yyyy");
             sheet1.Column(x => x.Quantity)
@@ -28,7 +29,7 @@ namespace Shane32.ExcelLinq.Tests.Models
                 .ColumnFormatter(range => range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center);
             sheet1.Column(x => x.Description)
                 .HeaderFormatter(headerFormatter);
-            sheet1.Column(x => x.Amount)
+            sheet1.Column(x => x.Amount).AlternateName("some amount")
                 .HeaderFormatter(headerFormatter)
                 .ColumnFormatter(numberFormatter);
             sheet1.Column(x => x.Total)
@@ -75,7 +76,7 @@ namespace Shane32.ExcelLinq.Tests.Models
             sheet2.Column(x => x.IntColumn);
             sheet2.Column(x => x.FloatColumn);
             sheet2.Column(x => x.DoubleColumn);
-            sheet2.Column(x => x.StringColumn);
+            sheet2.Column(x => x.StringColumn).AlternateName("be a string column");
             sheet2.Column(x => x.BooleanColumn);
             sheet2.Column(x => x.DateTimeColumn)
                 .ColumnFormatter(range => range.Style.Numberformat.Format = "MM/dd/yyyy hh:mm AM/PM");

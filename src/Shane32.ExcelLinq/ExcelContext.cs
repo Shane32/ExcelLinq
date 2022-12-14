@@ -75,23 +75,7 @@ namespace Shane32.ExcelLinq
         //    _sheets = InitializeReadFile(package);
         //    _initialized = true;
         //}
-
-        protected ExcelContext(Stream stream, string extensionType) : this()
-        {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-            if(extensionType == ".csv") {
-                var packaget = new ExcelPackage();
-                _initialized = false;
-                _sheets = OnReadCSVFile(packaget.Workbook, stream );
-                _initialized = true;
-            } else {
-                using var package = new ExcelPackage(stream);
-                _initialized = false;
-                _sheets = InitializeReadFile(package);
-                _initialized = true;
-            }
-        }
+        
         protected ExcelContext(Stream stream) : this()
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
@@ -118,6 +102,23 @@ namespace Shane32.ExcelLinq
             _initialized = true;
         }
 
+
+        public void ReadCsv(Stream stream)
+        {
+            var sheet1 = _model.Sheets.FirstOrDefault();
+            var col = sheet1.Columns;
+            var coltt = sheet1.Columns.FirstOrDefault();
+            var qqq = sheet1.Columns.Select(x => x.AlternateNames);
+            var ggg = sheet1.Columns.Select(x => x.Name);
+            var alts = sheet1.AlternateNames;
+            var sheet = _sheets.FirstOrDefault();
+            
+            var tt = sheet.GetType();
+
+            PropertyInfo[] propertyInfos;
+            propertyInfos = tt.GetProperties();
+                                                          
+        }
         //internal ExcelContext(IExcelModel model, ExcelPackage excelPackage) : this(model)
         //{
         //    _initialized = false;
