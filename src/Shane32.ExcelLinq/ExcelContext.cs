@@ -106,57 +106,100 @@ namespace Shane32.ExcelLinq
         public void ReadCsv(Stream stream)
         {
             var sheet1 = _model.Sheets.FirstOrDefault();
-            var col = sheet1.Columns;
-            var coltt = sheet1.Columns.FirstOrDefault();
-            var qqq = sheet1.Columns.Select(x => x.AlternateNames);
-            var ggg = sheet1.Columns.Select(x => x.Name);
+            var sheetType =  sheet1.Type;
+            //var sheetType =  sheet1.GetType();
+            var ggggg = sheetType.GetProperties();
+            //PropertyInfo rrrrrrr = sheetType.GetProperty("UnderlyingSystemType");
+
+            //creats single instance
+            object tyy = Activator.CreateInstance(sheetType);
+            var tt = tyy.GetType();
+            PropertyInfo prop = tt.GetProperty("Description");
+
+            prop.SetValue(tyy, "hey");
+            //var test = new Class1()
 
 
-            var alts = sheet1.AlternateNames;
-            var sheet = _sheets.FirstOrDefault();
-            
-            var tt = sheet.GetType();
+            //var param = System.Linq.Expressions.Expression.Parameter(sheetType);
+            //var body = System.Linq.Expressions.Expression.Property(param, "StringColumn");
+            //var expr = System.Linq.Expressions.Expression.Lambda(
+            //    body, param);
+            //var t = expr.Compile();
 
-            PropertyInfo[] propertyInfos;
-            propertyInfos = tt.GetProperties();
+            //creats list on class
+            Type genericListType = typeof(List<>);
+            Type concreteListType = genericListType.MakeGenericType(sheetType);
+            object list = Activator.CreateInstance(concreteListType);
 
-            using (var allSalesDbPartsParser = new TextFieldParser(stream)) {
-                //allEbayListingsParser.CommentTokens = new string[] { "#" };
-                allSalesDbPartsParser.SetDelimiters(new string[] { "," });
-                allSalesDbPartsParser.HasFieldsEnclosedInQuotes = true;
+            var colsNames = sheet1.Columns.Select(x => x.Name);
+            var altnames = sheet1.Columns.Select(x => x.AlternateNames);
+            var colss = sheet1.Columns;
 
-                //skip random line if junk
-                allSalesDbPartsParser.ReadLine();
+            var parse = new List<Type>();
+            foreach (var col in colss) {
+                var name = col.Name;
+                var alt = col.AlternateNames;
+                var type = col.Type;
 
-                // Skip the row with the column names
-                //var cols11 = allSalesDbPartsParser.ReadFields();
-                var cols = allSalesDbPartsParser.ReadFields();
-                var skuIndex = 0;
-                var qtyIndex = 0;
-                for (var i = 0; i < cols.Count(); i++) {
-                    var col = cols[i].ToLower();
-                    if (col == ("Custom label (SKU)").ToLower()) {
-                        skuIndex = i;
-                    }
+                var qqq = parse[1];
+                var dt = Convert.ChangeType("2009/12/12", type);
 
-                    if (col == ("Available quantity").ToLower()) {
-                        qtyIndex = i;
-                    }
-                }
-
-
-                while (!allSalesDbPartsParser.EndOfData) {
-                    var part = new EbayInput();
-                    string[] fields = allSalesDbPartsParser.ReadFields();
-                    part.Sku = fields[skuIndex];
-                    part.Quantity = decimal.Parse(fields[qtyIndex]);
-                    //part.Sku = fields[10];
-                    //part.Quantity = decimal.Parse(fields[7]);
-
-
-                    EbayInputs.Add(part);
-                }
             }
+
+            //var t = sheetType.GetConstructor();
+            //var qqqt = sheetType.GetConstructor(new Type[] { typeof(string) });
+
+            //ConstructorInfo ctor = sheetType.GetConstructor(new[] { typeof(int) });
+            //object instance = ctor.Invoke(new object[] { 10 });
+            //object list = Activator.CreateInstance(concreteListType, new object[] { values });
+            //ConstructorInfo ctor = sheetType.GetConstructor(new {  });
+            //object instance = ctor.Invoke(new object[] { 10 });
+
+
+            //var sheet = _sheets.FirstOrDefault();
+
+            //var tt = sheet.Type;
+
+            //PropertyInfo[] propertyInfos;
+            //propertyInfos = tt.GetProperties();
+
+            //using (var allSalesDbPartsParser = new TextFieldParser(stream)) {
+            //    //allEbayListingsParser.CommentTokens = new string[] { "#" };
+            //    allSalesDbPartsParser.SetDelimiters(new string[] { "," });
+            //    allSalesDbPartsParser.HasFieldsEnclosedInQuotes = true;
+
+            //    //skip random line if junk
+            //    allSalesDbPartsParser.ReadLine();
+
+            //    // Skip the row with the column names
+            //    //var cols11 = allSalesDbPartsParser.ReadFields();
+            //    var cols = allSalesDbPartsParser.ReadFields();
+            //    var skuIndex = 0;
+            //    var qtyIndex = 0;
+            //    for (var i = 0; i < cols.Count(); i++) {
+            //        var col = cols[i].ToLower();
+            //        if (col == ("Custom label (SKU)").ToLower()) {
+            //            skuIndex = i;
+            //        }
+
+            //        if (col == ("Available quantity").ToLower()) {
+            //            qtyIndex = i;
+            //        }
+            //    }
+
+
+            //    while (!allSalesDbPartsParser.EndOfData) {
+            //        var part = new EbayInput();
+            //        string[] fields = allSalesDbPartsParser.ReadFields();
+            //        part.Sku = fields[skuIndex];
+            //        part.Quantity = decimal.Parse(fields[qtyIndex]);
+            //        //part.Sku = fields[10];
+            //        //part.Quantity = decimal.Parse(fields[7]);
+
+
+            //        EbayInputs.Add(part);
+            //    }
+            //}
 
         }
         //internal ExcelContext(IExcelModel model, ExcelPackage excelPackage) : this(model)
