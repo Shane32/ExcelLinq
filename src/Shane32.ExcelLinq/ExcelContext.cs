@@ -107,29 +107,25 @@ namespace Shane32.ExcelLinq
         {
             var sheet1 = _model.Sheets.FirstOrDefault();
             var sheetType =  sheet1.Type;
-            //var sheetType =  sheet1.GetType();
-            var ggggg = sheetType.GetProperties();
-            //PropertyInfo rrrrrrr = sheetType.GetProperty("UnderlyingSystemType");
+            var fields = sheetType.GetFields();
 
             //creats single instance
             object tyy = Activator.CreateInstance(sheetType);
-            var tt = tyy.GetType();
-            PropertyInfo prop = tt.GetProperty("Description");
 
-            prop.SetValue(tyy, "hey");
-            //var test = new Class1()
+            var qq = sheetType.GetField("Description"); 
+            qq.SetValue(tyy, "new value");
 
-
-            //var param = System.Linq.Expressions.Expression.Parameter(sheetType);
-            //var body = System.Linq.Expressions.Expression.Property(param, "StringColumn");
-            //var expr = System.Linq.Expressions.Expression.Lambda(
-            //    body, param);
-            //var t = expr.Compile();
 
             //creats list on class
             Type genericListType = typeof(List<>);
             Type concreteListType = genericListType.MakeGenericType(sheetType);
             object list = Activator.CreateInstance(concreteListType);
+            var liTy = list.GetType();
+            var add = liTy.GetMethod("Add");
+            add.Invoke(list, new object[] { tyy});
+            
+
+
 
             var colsNames = sheet1.Columns.Select(x => x.Name);
             var altnames = sheet1.Columns.Select(x => x.AlternateNames);
