@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using OfficeOpenXml;
 using Shane32.ExcelLinq.Builders;
@@ -103,27 +104,79 @@ namespace Shane32.ExcelLinq
         }
 
 
-        public void ReadCsv(Stream stream)
+        public void ReadCsv<T>(Stream stream)
         {
             var sheet1 = _model.Sheets.FirstOrDefault();
             var sheetType =  sheet1.Type;
             var fields = sheetType.GetFields();
-
+            
             //creats single instance
-            object tyy = Activator.CreateInstance(sheetType);
+            T tyy = Activator.CreateInstance<T>();
+            
+            //T tyy = Activator.CreateInstance<T>(sheetType);
 
-            var qq = sheetType.GetField("Description"); 
-            qq.SetValue(tyy, "new value");
+            //var qq = sheetType.GetField("StringColumn"); 
+            //qq.SetValue(tyy, "new value");
 
 
             //creats list on class
-            Type genericListType = typeof(List<>);
-            Type concreteListType = genericListType.MakeGenericType(sheetType);
-            object list = Activator.CreateInstance(concreteListType);
-            var liTy = list.GetType();
-            var add = liTy.GetMethod("Add");
-            add.Invoke(list, new object[] { tyy});
+            //Type genericListType = typeof(List<>);
+            //Type concreteListType = genericListType.MakeGenericType(sheetType);
+            //var list = Activator.CreateInstance(concreteListType);
+            //var liTy = list.GetType();
+            //var add = liTy.GetMethod("Add");
+            //add.Invoke(list, new object[] { tyy});
+
+
+            //var param = System.Linq.Expressions.Expression.Parameter(sheetType);
+            //var body = System.Linq.Expressions.Expression.Field(param, "Description");
+            ////var expr = System.Linq.Expressions.Expression.Lambda<Func<object, string>>(
+            //var expr = System.Linq.Expressions.Expression.Lambda(
+            //    body, param);
+            //var eee = expr.Compile();
             
+
+            var ttt = GetPropFunc<T>("StringColumn");
+            var ttt2 = ttt(tyy);
+
+
+            Func<T, string> GetPropFunc<T>(string propName)
+            {
+                var param = System.Linq.Expressions.Expression.Parameter(typeof(T));
+                var body = System.Linq.Expressions.Expression.Field(param, propName);
+                var expr = System.Linq.Expressions.Expression.Lambda<Func<T, string>>(
+                    body, param);
+                return expr.Compile();
+            }
+
+
+                // Create an instance of the example class.
+            //    Example obj = new Example();
+            //void setFunc<T>()
+            //{
+
+                // Define a parameter for the expression tree.
+                ParameterExpression param = Expression.Parameter(typeof(T), "x");
+
+                // Create an expression tree that represents the property access x.MyProperty.
+                MemberExpression property = Expression.Property(param, "MyProperty");
+
+                // Create an expression tree that represents the assignment x.MyProperty = 42.
+                BinaryExpression assignment = Expression.Assign(property, Expression.Constant(42));
+
+                // Create an expression tree that represents the lambda expression x => x.MyProperty = 42.
+                Expression setProperty = Expression.Lambda(assignment, param);
+
+                // Compile the expression tree into a delegate.
+                Action<T> setPropertyAction = (Action<T>)setProperty.Compile();
+
+                // Invoke the delegate to set the property value.
+                setPropertyAction(tyy);
+
+                // Print the property value.
+            //    Console.WriteLine(obj.MyProperty); // Output: 42
+            //}
+
 
 
 

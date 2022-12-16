@@ -27,7 +27,7 @@ namespace General
         {
             var xl = new TestFileContext();
             using var stream = new System.IO.FileStream("test.csv", System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
-            xl.ReadCsv(stream);
+            xl.ReadCsv<Class1>(stream);
             ReadSample1File_test(xl);
         }
 
