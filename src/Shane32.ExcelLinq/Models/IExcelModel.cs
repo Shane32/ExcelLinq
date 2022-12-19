@@ -4,5 +4,6 @@ namespace Shane32.ExcelLinq.Models
     {
         ISheetModelLookup Sheets { get; }
         bool IgnoreSheetNames { get; }
+        bool ReadCsv { get; }
     }
 }

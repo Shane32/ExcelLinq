@@ -32,6 +32,7 @@ namespace Shane32.ExcelLinq.Builders
             excelModelBuilder._typeDictionary.Add(typeof(T), this);
         }
 
+
         public SheetModelBuilder<T> AlternateName(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));

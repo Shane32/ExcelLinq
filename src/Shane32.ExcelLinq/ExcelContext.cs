@@ -104,7 +104,11 @@ namespace Shane32.ExcelLinq
         }
 
 
-        public void ReadCsv<T>(Stream stream)
+        public IList ReadCsv<T>(Stream stream)
+        {
+            return OnReadCSv(stream, Model.Sheets[0]);
+        }
+        public void ReadCsvOld<T>(Stream stream)
         {
             var sheet1 = _model.Sheets.FirstOrDefault();
             var sheetType =  sheet1.Type;
@@ -136,8 +140,8 @@ namespace Shane32.ExcelLinq
             //var eee = expr.Compile();
             
 
-            var ttt = GetPropFunc<T>("StringColumn");
-            var ttt2 = ttt(tyy);
+            //var ttt = GetPropFunc<T>("StringColumn");
+            //var ttt2 = ttt(tyy);
 
 
             Func<T, string> GetPropFunc<T>(string propName)
@@ -156,22 +160,22 @@ namespace Shane32.ExcelLinq
             //{
 
                 // Define a parameter for the expression tree.
-                ParameterExpression param = Expression.Parameter(typeof(T), "x");
+                //ParameterExpression param = Expression.Parameter(typeof(T), "x");
 
-                // Create an expression tree that represents the property access x.MyProperty.
-                MemberExpression property = Expression.Property(param, "MyProperty");
+                //// Create an expression tree that represents the property access x.MyProperty.
+                //MemberExpression property = Expression.Property(param, "MyProperty");
 
-                // Create an expression tree that represents the assignment x.MyProperty = 42.
-                BinaryExpression assignment = Expression.Assign(property, Expression.Constant(42));
+                //// Create an expression tree that represents the assignment x.MyProperty = 42.
+                //BinaryExpression assignment = Expression.Assign(property, Expression.Constant(42));
 
-                // Create an expression tree that represents the lambda expression x => x.MyProperty = 42.
-                Expression setProperty = Expression.Lambda(assignment, param);
+                //// Create an expression tree that represents the lambda expression x => x.MyProperty = 42.
+                //Expression setProperty = Expression.Lambda(assignment, param);
 
                 // Compile the expression tree into a delegate.
-                Action<T> setPropertyAction = (Action<T>)setProperty.Compile();
+                //Action<T> setPropertyAction = (Action<T>)setProperty.Compile();
 
                 // Invoke the delegate to set the property value.
-                setPropertyAction(tyy);
+                //setPropertyAction(tyy);
 
                 // Print the property value.
             //    Console.WriteLine(obj.MyProperty); // Output: 42
@@ -180,20 +184,20 @@ namespace Shane32.ExcelLinq
 
 
 
-            var colsNames = sheet1.Columns.Select(x => x.Name);
-            var altnames = sheet1.Columns.Select(x => x.AlternateNames);
-            var colss = sheet1.Columns;
+            //var colsNames = sheet1.Columns.Select(x => x.Name);
+            //var altnames = sheet1.Columns.Select(x => x.AlternateNames);
+            //var colss = sheet1.Columns;
 
-            var parse = new List<Type>();
-            foreach (var col in colss) {
-                var name = col.Name;
-                var alt = col.AlternateNames;
-                var type = col.Type;
+            //var parse = new List<Type>();
+            //foreach (var col in colss) {
+            //    var name = col.Name;
+            //    var alt = col.AlternateNames;
+            //    var type = col.Type;
 
-                var qqq = parse[1];
-                var dt = Convert.ChangeType("2009/12/12", type);
+            //    var qqq = parse[1];
+            //    var dt = Convert.ChangeType("2009/12/12", type);
 
-            }
+            //}
 
             //var t = sheetType.GetConstructor();
             //var qqqt = sheetType.GetConstructor(new Type[] { typeof(string) });
@@ -292,48 +296,6 @@ namespace Shane32.ExcelLinq
         protected abstract void OnModelCreating(ExcelModelBuilder modelBuilder);
 
 
-        protected virtual List<IList> OnReadCSVFile(ExcelWorkbook workbook, Stream stream)
-        {
-            if (workbook == null)
-                throw new ArgumentNullException(nameof(workbook));
-            var sheets = new List<IList>(new IList[Model.Sheets.Count]);
-
-            var sheetArray = Model.Sheets.ToList();
-            //if (Model.IgnoreSheetNames) {
-            //    for (var i = 0; i < workbook.Worksheets.Count && i < sheetArray.Count; i++) {
-            //        var worksheet = workbook.Worksheets[i];
-            //        var sheetModel = Model.Sheets[i];
-            //        var sheetData = OnReadSheet(worksheet, sheetModel);
-            //        if (sheetData == null)
-            //            throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
-            //        sheets[i] = sheetData;
-            //    }
-            //} else{
-                //foreach (var workSheet in workbook.Worksheets) {
-                //    if (Model.Sheets.TryGetValue(workSheet.Name, out var sheetModel)) {
-                //        var sheetIndex = sheetArray.IndexOf(sheetModel);
-                //        if (sheets[sheetIndex] != null)
-                //            throw new DuplicateSheetException(sheetModel.Name);
-                //        var sheetData = OnReadSheet(workSheet, sheetModel);
-                //        if (sheetData == null)
-                //            throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
-                //        sheets[sheetIndex] = sheetData;
-                //    }
-                //}
-            //}
-
-            for (int i = 0; i < Model.Sheets.Count; i++) {
-                if (sheets[i] == null) {
-                    var sheetModel = Model.Sheets[i];
-                    if (sheetModel.Optional)
-                        sheets[i] = CreateListForSheet(sheetModel.Type);
-                    else
-                        throw new SheetMissingException(sheetModel.Name);
-                }
-            }
-
-            return sheets;
-        }
 
         /// <summary>
         /// Parses an <see cref="ExcelPackage"/> and returns all of the data within all the worksheets.
@@ -381,7 +343,96 @@ namespace Shane32.ExcelLinq
             return sheets;
         }
 
+        protected virtual IList OnReadCSv(Stream stream, ISheetModel model)
+        {
+            //if (worksheet == null)
+            //    throw new ArgumentNullException(nameof(worksheet));
+            //if (model == null)
+            //    throw new ArgumentNullException(nameof(model));
+            //ExcelRange dataRange = (model.ReadRangeLocator ?? DefaultReadRangeLocator)(worksheet);
+                //allEbayListingsParser.CommentTokens = new string[] { "#" };
+                //allSalesDbPartsParser.SetDelimiters(new string[] { "," });
+            using (var parser = new NotVisualBasic.FileIO.CsvTextFieldParser(stream)) {
+                
+            parser.Delimiters = new string[] { "," };
+            parser.HasFieldsEnclosedInQuotes = true;
+                
+            var Rows = 10;
+            var collumns = 10;
+            var StartRow = 0;
+            var ColumnStart = 0;
+            var EndRow = 20;
 
+                var headerRow = 0;
+                var currentRow = 0;
+                string[] headers = null;
+                while (!parser.EndOfData) {                    
+                    if(currentRow == headerRow) {
+                        headers = parser.ReadFields();
+                        ++currentRow;
+                        break;
+                    }
+                    ++currentRow;
+                }
+
+                if (headers == null) {
+                    //throw error
+                }
+
+                    //if (dataRange == null) {
+                    //    //no data on sheet
+                    //    if (model.Columns.Any(x => !x.Optional))
+                    //        throw new SheetEmptyException(model.Name);
+                    //    return CreateListForSheet(model.Type);
+                    //}
+                    IList data = CreateListForSheet(model.Type, Rows - 1);
+            //var headerRow = StartRow;
+            var firstCol = ColumnStart;
+            var columns = collumns;
+            var firstRow = StartRow + 1;
+            var lastRow = EndRow;
+            var columnMapping = new IColumnModel[columns];
+            var columnMapped = new bool[model.Columns.Count];
+            var modelColumns = model.Columns.ToList();
+
+            for (int colIndex = 0; colIndex < columns; colIndex++) {
+                var col = colIndex + firstCol;
+                var cell = headers[col];
+                if (cell != null) {
+                    var headerName = cell;
+                    if (model.Columns.TryGetValue(headerName, out var columnModel)) {
+                        var columnModelIndex = modelColumns.IndexOf(columnModel);
+                        if (columnMapped[columnModelIndex])
+                            throw new DuplicateColumnException(columnModel.Name, model.Name);
+                        columnMapped[columnModelIndex] = true;
+                        columnMapping[colIndex] = columnModel;
+                    }
+                }
+            }
+
+            for (int i = 0; i < model.Columns.Count; i++) {
+                if (columnMapped[i] == false && !model.Columns[i].Optional)
+                    throw new ColumnMissingException(model.Columns[i].Name, model.Name);
+            }
+
+            while(!parser.EndOfData) {
+                //var range = worksheet.Cells[row, firstCol, row, firstCol + columns - 1];
+                var range = parser.ReadFields();
+                var obj = OnReadCSVRow(range, model, columnMapping);
+                if (obj != null)
+                    data.Add(obj);
+                ++currentRow;
+            }
+            //    for (int row = firstRow; row <= lastRow; row++) {
+            //    var range = worksheet.Cells[row, firstCol, row, firstCol + columns - 1];
+            //    var obj = OnReadRow(range, model, columnMapping);
+            //    if (obj != null)
+            //        data.Add(obj);
+            //}
+
+            return data;
+            }
+        }
 
 
         /// <summary>
@@ -438,7 +489,64 @@ namespace Shane32.ExcelLinq
 
             return data;
         }
-
+        protected virtual object OnReadCSVRow(string[] range, ISheetModel model, IColumnModel[] columnMapping)
+        {
+            if (range == null)
+                throw new ArgumentNullException(nameof(range));
+            if (model == null)
+                throw new ArgumentNullException(nameof(range));
+            if (columnMapping == null)
+                throw new ArgumentNullException(nameof(columnMapping));
+            var firstCol = 0;
+            var row = 0;
+            var columns = range.Length;
+            //if (range.Rows != 1)
+            //    throw new ArgumentOutOfRangeException(nameof(range), "Range must represent a single row of data");
+            if (columns != columnMapping.Length)
+                throw new ArgumentOutOfRangeException(nameof(columnMapping), "Number of columns in range does not match size of columnMapping array");
+            var obj = Activator.CreateInstance(model.Type);
+            if (range.Any(x => x != null)) {
+                for (int colIndex = 0; colIndex < columns; colIndex++) {
+                    var col = colIndex + firstCol;
+                    var columnModel = columnMapping[colIndex];
+                    if (columnModel != null) {
+                        var cell = range[col]; // note that range[] resets range.Address to equal the new address
+                        if (cell == null) {
+                            if (!columnModel.Optional)
+                                throw new ColumnDataMissingException(columnModel.Name, model.Name);
+                        } else {
+                            object value;
+                            try {
+                                //if (columnModel.ReadSerializer != null) {
+                                //    value = columnModel.ReadSerializer(cell);
+                                //} else {
+                                    value = DefaultCsvReadSerializer(cell, cell, columnModel.Type);
+                                //}
+                            } catch (Exception e) {
+                                throw new ParseDataException(cell, columnModel.Name, model.Name, e);
+                            }
+                            if (value != null) {
+                                if (columnModel.Member is PropertyInfo propertyInfo) {
+                                    propertyInfo.SetMethod.Invoke(obj, new[] { value });
+                                } else if (columnModel.Member is FieldInfo fieldInfo) {
+                                    fieldInfo.SetValue(obj, value);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (model.SkipEmptyRows) {
+                    obj = null;
+                } else {
+                    foreach (var columnModel in columnMapping) {
+                        if (!columnModel.Optional)
+                            throw new RowEmptyException(model.Name);
+                    }
+                }
+            }
+            return obj;
+        }
         /// <summary>
         /// Parses a row of data or returns null if the row should be skipped
         /// </summary>
@@ -507,6 +615,53 @@ namespace Shane32.ExcelLinq
             var dimension = worksheet.Dimension;
             if (dimension == null) return null; // no cells
             return worksheet.Cells[dimension.Start.Row, dimension.Start.Column, dimension.End.Row, dimension.End.Column];
+        }
+        protected virtual object DefaultCsvReadSerializer(object value, string text, Type dataType)
+        {
+            if (value == null) {
+                return null;
+            }
+            if (dataType.IsGenericType && dataType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+                return DefaultCsvReadSerializer(value, text, Nullable.GetUnderlyingType(dataType));
+            }
+            if (value.GetType() == dataType)
+                return value;
+            if (dataType == typeof(string))
+                return text;
+            if (dataType == typeof(DateTime)) {
+                if (value is string str)
+                    return DateTime.Parse(str);
+                return DateTime.FromOADate((double)DefaultCsvReadSerializer(value, text, typeof(double)));
+            }
+            if (dataType == typeof(TimeSpan)) {
+                if (value is DateTime dt)
+                    return dt.TimeOfDay;
+                if (value is string str)
+                    return TimeSpan.Parse(str);
+                return DateTime.FromOADate((double)DefaultCsvReadSerializer(value, text, typeof(double))).TimeOfDay;
+            }
+            if (dataType == typeof(DateTimeOffset)) {
+                throw new NotSupportedException("DateTimeOffset values are not supported");
+            }
+            if (dataType == typeof(Uri)) {
+                return new Uri(text);
+            }
+            if (dataType == typeof(Guid)) {
+                return Guid.Parse(text);
+            }
+            if (dataType == typeof(bool)) {
+                if (value is string str) {
+                    switch (str.ToLower()) {
+                        case "y":
+                        case "yes":
+                            return true;
+                        case "n":
+                        case "no":
+                            return false;
+                    }
+                }
+            }
+            return Convert.ChangeType(value, dataType);
         }
 
         /// <summary>

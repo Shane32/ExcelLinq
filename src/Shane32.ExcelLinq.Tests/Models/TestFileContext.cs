@@ -19,6 +19,8 @@ namespace Shane32.ExcelLinq.Tests.Models
                 range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 range.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
             };
+            builder.ReadCsv();
+
             Action<ExcelRange> numberFormatter = range => range.Style.Numberformat.Format = "#,##0.00";
             var sheet1 = builder.Sheet<Sheet1>();
             sheet1.Column(x => x.Date).AlternateName("its a date")
