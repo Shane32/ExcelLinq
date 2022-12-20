@@ -9,6 +9,7 @@ using OfficeOpenXml;
 using Shane32.ExcelLinq.Builders;
 using Shane32.ExcelLinq.Exceptions;
 using Shane32.ExcelLinq.Models;
+using NotVisualBasic.FileIO;
 
 namespace Shane32.ExcelLinq
 {
@@ -106,7 +107,7 @@ namespace Shane32.ExcelLinq
 
         public IList ReadCsv<T>(Stream stream)
         {
-            return OnReadCSv(stream, Model.Sheets[0]);
+            return OnReadCSv(stream, Model.Sheets[1]);
         }
         public void ReadCsvOld<T>(Stream stream)
         {
@@ -345,50 +346,39 @@ namespace Shane32.ExcelLinq
 
         protected virtual IList OnReadCSv(Stream stream, ISheetModel model)
         {
-            //if (worksheet == null)
-            //    throw new ArgumentNullException(nameof(worksheet));
-            //if (model == null)
-            //    throw new ArgumentNullException(nameof(model));
-            //ExcelRange dataRange = (model.ReadRangeLocator ?? DefaultReadRangeLocator)(worksheet);
-                //allEbayListingsParser.CommentTokens = new string[] { "#" };
-                //allSalesDbPartsParser.SetDelimiters(new string[] { "," });
-            using (var parser = new NotVisualBasic.FileIO.CsvTextFieldParser(stream)) {
+            using (var parser = new CsvTextFieldParser(stream)) {
                 
             parser.Delimiters = new string[] { "," };
             parser.HasFieldsEnclosedInQuotes = true;
                 
-            var Rows = 10;
-            var collumns = 10;
-            var StartRow = 0;
+
+                //var Rows = 10;
+                //var collumns = 10;
+                //var Range = (model.CsvReadRangeLocator ?? DefaultCsvReadRangeLocator)()
+                var StartRow = 0;
             var ColumnStart = 0;
-            var EndRow = 20;
+            var EndRow = parser.LineNumber;
 
-                var headerRow = 0;
-                var currentRow = 0;
-                string[] headers = null;
-                while (!parser.EndOfData) {                    
-                    if(currentRow == headerRow) {
-                        headers = parser.ReadFields();
-                        ++currentRow;
-                        break;
-                    }
+            var headerRow = 0;
+            var currentRow = 0;
+            string[] headers = null;
+            while (!parser.EndOfData) {                    
+                if(currentRow == headerRow) {
+                    headers = parser.ReadFields();
                     ++currentRow;
+                    break;
                 }
+                ++currentRow;
+            }
 
-                if (headers == null) {
-                    //throw error
-                }
+            if (headers == null) {
+                //throw error
+            }
 
-                    //if (dataRange == null) {
-                    //    //no data on sheet
-                    //    if (model.Columns.Any(x => !x.Optional))
-                    //        throw new SheetEmptyException(model.Name);
-                    //    return CreateListForSheet(model.Type);
-                    //}
-                    IList data = CreateListForSheet(model.Type, Rows - 1);
-            //var headerRow = StartRow;
+                    
+            IList data = CreateListForSheet(model.Type, 0);
             var firstCol = ColumnStart;
-            var columns = collumns;
+            var columns = model.Columns.Count;
             var firstRow = StartRow + 1;
             var lastRow = EndRow;
             var columnMapping = new IColumnModel[columns];
@@ -416,19 +406,13 @@ namespace Shane32.ExcelLinq
             }
 
             while(!parser.EndOfData) {
-                //var range = worksheet.Cells[row, firstCol, row, firstCol + columns - 1];
                 var range = parser.ReadFields();
                 var obj = OnReadCSVRow(range, model, columnMapping);
                 if (obj != null)
                     data.Add(obj);
                 ++currentRow;
             }
-            //    for (int row = firstRow; row <= lastRow; row++) {
-            //    var range = worksheet.Cells[row, firstCol, row, firstCol + columns - 1];
-            //    var obj = OnReadRow(range, model, columnMapping);
-            //    if (obj != null)
-            //        data.Add(obj);
-            //}
+            
 
             return data;
             }
@@ -511,7 +495,7 @@ namespace Shane32.ExcelLinq
                     var columnModel = columnMapping[colIndex];
                     if (columnModel != null) {
                         var cell = range[col]; // note that range[] resets range.Address to equal the new address
-                        if (cell == null) {
+                        if (string.IsNullOrEmpty(cell)) {
                             if (!columnModel.Optional)
                                 throw new ColumnDataMissingException(columnModel.Name, model.Name);
                         } else {
@@ -637,8 +621,11 @@ namespace Shane32.ExcelLinq
                 if (value is DateTime dt)
                     return dt.TimeOfDay;
                 if (value is string str)
-                    return TimeSpan.Parse(str);
-                return DateTime.FromOADate((double)DefaultCsvReadSerializer(value, text, typeof(double))).TimeOfDay;
+                    try {
+                        return TimeSpan.Parse(str);
+                    } catch (FormatException) {
+                        return DateTime.Parse(str).TimeOfDay;
+                    }
             }
             if (dataType == typeof(DateTimeOffset)) {
                 throw new NotSupportedException("DateTimeOffset values are not supported");
@@ -653,15 +640,67 @@ namespace Shane32.ExcelLinq
                 if (value is string str) {
                     switch (str.ToLower()) {
                         case "y":
+                        case "1":
                         case "yes":
                             return true;
                         case "n":
+                        case "0":
                         case "no":
                             return false;
                     }
                 }
             }
+            if(dataType.ToString() == "NullableIntColumn") {
+                
+            }
+
+            if (dataType == typeof(int?)) {
+                if (value is string str) {
+                    var success = int.TryParse(str, out int result);
+                    if (success)
+                        return result;
+                    return null;
+                }
+            }
+            if (dataType == typeof(int)) {
+                if (value is string str) {
+                    var success = int.TryParse(str, out int result);
+                    if (success)
+                        return result;
+
+                    return  Convert.ToInt32(Math.Floor(double.Parse(str)));
+                }
+            }
+            //nullable int tye check
+
+            //if (dataType = typeof(nullableInt)
+
+            if (dataType == typeof(double)) {
+                if (value is string str) {
+                    return double.Parse(str);
+                }
+            }
+
+            if (dataType == typeof(decimal)) {
+                if (value is string str) {
+                    return decimal.Parse(str);
+                }
+            }
+
+            if (dataType == typeof(float)) {
+                if (value is string str) {
+                    return float.Parse(str);
+                }
+            }
+
+            
+            //try {
+
             return Convert.ChangeType(value, dataType);
+            //} catch {
+            //    return Convert.ChangeType(Math.Floor(Convert.ToDouble(value)), dataType);
+                
+            //}
         }
 
         /// <summary>

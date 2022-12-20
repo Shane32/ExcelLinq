@@ -11,6 +11,7 @@ namespace Shane32.ExcelLinq.Models
         IReadOnlyList<string> AlternateNames { get; }
         IColumnModelLookup Columns { get; }
         Func<ExcelWorksheet, ExcelRange> ReadRangeLocator { get; }
+        Func<CsvRange, CsvRange> CsvReadRangeLocator { get; }
         Func<ExcelWorksheet, ExcelRange> WriteRangeLocator { get; }
         Action<ExcelWorksheet, ExcelRange> WritePolisher { get; }
         bool Optional { get; }
