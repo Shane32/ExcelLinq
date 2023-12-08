@@ -1,7 +1,7 @@
-using Shane32.ExcelLinq.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Shane32.ExcelLinq.Models;
 
 namespace Shane32.ExcelLinq.Builders
 {
@@ -19,7 +19,8 @@ namespace Shane32.ExcelLinq.Builders
 
         public SheetModelBuilder<T> Sheet<T>(string name) where T : new()
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
             var trimmedName = name.Trim();
             for (int i = 0; i < _sheets.Count; i++) {
                 if (_sheets[i].Type == typeof(T) && _sheets[i].Name == trimmedName) {
