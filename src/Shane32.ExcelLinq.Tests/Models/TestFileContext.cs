@@ -7,6 +7,7 @@ namespace Shane32.ExcelLinq.Tests.Models
 {
     public class TestFileContext : ExcelContext
     {
+        public TestFileContext() : base() { }
         public TestFileContext(System.IO.Stream stream) : base(stream) { }
         public TestFileContext(string filename) : base(filename) { }
         public TestFileContext(ExcelPackage excelPackage) : base(excelPackage) { }
@@ -14,12 +15,15 @@ namespace Shane32.ExcelLinq.Tests.Models
         protected override void OnModelCreating(ExcelModelBuilder builder)
         {
             Action<ExcelRange> headerFormatter = range => {
+                
                 range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 range.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
             };
+            builder.ReadCsv();
+
             Action<ExcelRange> numberFormatter = range => range.Style.Numberformat.Format = "#,##0.00";
             var sheet1 = builder.Sheet<Sheet1>();
-            sheet1.Column(x => x.Date)
+            sheet1.Column(x => x.Date).AlternateName("its a date")
                 .HeaderFormatter(headerFormatter)
                 .ColumnFormatter(range => range.Style.Numberformat.Format = "MM/dd/yyyy");
             sheet1.Column(x => x.Quantity)
@@ -27,7 +31,7 @@ namespace Shane32.ExcelLinq.Tests.Models
                 .ColumnFormatter(range => range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center);
             sheet1.Column(x => x.Description)
                 .HeaderFormatter(headerFormatter);
-            sheet1.Column(x => x.Amount)
+            sheet1.Column(x => x.Amount).AlternateName("some amount")
                 .HeaderFormatter(headerFormatter)
                 .ColumnFormatter(numberFormatter);
             sheet1.Column(x => x.Total)
@@ -62,11 +66,11 @@ namespace Shane32.ExcelLinq.Tests.Models
             sheet1.WriteRangeLocator(worksheet => worksheet.Cells[3, 1]);
             sheet1.WritePolisher((worksheet, range) => {
                 worksheet.Calculate();
-                for (int col = 1; col <= worksheet.Dimension.End.Column; col++) {
-                    var column = worksheet.Column(col);
-                    column.AutoFit();
-                    column.Width *= 1.2;
-                }
+                //for (int col = 1; col <= worksheet.Dimension.End.Column; col++) {
+                //    var column = worksheet.Column(col);
+                //    column.AutoFit();
+                //    column.Width *= 1.2;
+                //}
                 worksheet.Cells[1, 1].Value = "This is a test header";
             });
 
@@ -74,7 +78,7 @@ namespace Shane32.ExcelLinq.Tests.Models
             sheet2.Column(x => x.IntColumn);
             sheet2.Column(x => x.FloatColumn);
             sheet2.Column(x => x.DoubleColumn);
-            sheet2.Column(x => x.StringColumn);
+            sheet2.Column(x => x.StringColumn).AlternateName("be a string column");
             sheet2.Column(x => x.BooleanColumn);
             sheet2.Column(x => x.DateTimeColumn)
                 .ColumnFormatter(range => range.Style.Numberformat.Format = "MM/dd/yyyy hh:mm AM/PM");

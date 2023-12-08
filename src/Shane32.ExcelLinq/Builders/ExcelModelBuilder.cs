@@ -11,12 +11,13 @@ namespace Shane32.ExcelLinq.Builders
         internal Dictionary<string, ISheetModel> _sheetDictionary = new Dictionary<string, ISheetModel>();
         internal Dictionary<Type, ISheetModel> _typeDictionary = new Dictionary<Type, ISheetModel>();
         private bool _ignoreSheetNames;
+        public bool _readCsv;
 
         public SheetModelBuilder<T> Sheet<T>() where T : new()
         {
             return Sheet<T>(typeof(T).Name);
         }
-
+        
         public SheetModelBuilder<T> Sheet<T>(string name) where T : new()
         {
             if (name == null)
@@ -34,6 +35,8 @@ namespace Shane32.ExcelLinq.Builders
         {
             _ignoreSheetNames = true;
         }
+        bool IExcelModel.ReadCsv => _readCsv;
+        public void ReadCsv() => _readCsv = true;
 
         IEnumerator<ISheetModel> IEnumerable<ISheetModel>.GetEnumerator() => _sheets.GetEnumerator();
 
