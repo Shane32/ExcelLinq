@@ -42,9 +42,7 @@ namespace Shane32.ExcelLinq
         // used by unit tests only
         internal ExcelContext(IExcelModel model)
         {
-            if (model == null)
-                throw new ArgumentNullException(nameof(model));
-            _model = model;
+            _model = model ?? throw new ArgumentNullException(nameof(model));
             _sheets = new List<IList>(Model.Sheets.Count);
             _sheetNameLookup = new Dictionary<string, int>(Model.Sheets.Count);
             _typeLookup = new Dictionary<Type, int>(Model.Sheets.Count);
@@ -120,9 +118,8 @@ namespace Shane32.ExcelLinq
         {
             if (excelFile == null)
                 throw new ArgumentNullException(nameof(excelFile));
-            var data = OnReadFile(excelFile.Workbook);
-            if (data == null)
-                throw new InvalidOperationException("No data returned from OnReadFile");
+            var data = OnReadFile(excelFile.Workbook)
+                ?? throw new InvalidOperationException("No data returned from OnReadFile");
             if (data.Count != _sheets.Count)
                 throw new InvalidOperationException("Invalid number of sheets returned from OnReadFile");
             for (int i = 0; i < _sheets.Count; i++) {
@@ -166,9 +163,7 @@ namespace Shane32.ExcelLinq
                 foreach (var worksheet in workbook.Worksheets) {
                     var sheetModel = Model.Sheets[i];
                     var sheetData = OnReadSheet(worksheet, sheetModel);
-                    if (sheetData == null)
-                        throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
-                    sheets[i++] = sheetData;
+                    sheets[i++] = sheetData ?? throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
                 }
             } else {
                 foreach (var workSheet in workbook.Worksheets) {
@@ -177,9 +172,7 @@ namespace Shane32.ExcelLinq
                         if (sheets[sheetIndex] != null)
                             throw new DuplicateSheetException(sheetModel.Name);
                         var sheetData = OnReadSheet(workSheet, sheetModel);
-                        if (sheetData == null)
-                            throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
-                        sheets[sheetIndex] = sheetData;
+                        sheets[sheetIndex] = sheetData ?? throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
                     }
                 }
             }
@@ -438,9 +431,7 @@ namespace Shane32.ExcelLinq
                 throw new ArgumentNullException(nameof(model));
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            ExcelRange start = (model.WriteRangeLocator ?? DefaultWriteRangeLocator)(worksheet);
-            if (start == null)
-                throw new InvalidOperationException("No write range specified");
+            ExcelRange start = (model.WriteRangeLocator ?? DefaultWriteRangeLocator)(worksheet) ?? throw new InvalidOperationException("No write range specified");
             var headerRow = start.Start.Row;
             var dataRow = headerRow + 1;
             var firstCol = start.Start.Column;
