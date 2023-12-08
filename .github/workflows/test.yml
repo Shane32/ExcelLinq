@@ -21,11 +21,15 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
+      - name: Install libgdiplus (Ubuntu only)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdiplus
       - name: Use .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: |
-            2.1.x
             3.1.x
             5.0.x
             6.0.x
