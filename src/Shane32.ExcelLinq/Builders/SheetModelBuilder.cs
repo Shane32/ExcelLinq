@@ -25,11 +25,10 @@ namespace Shane32.ExcelLinq.Builders
             _excelModelBuilder = excelModelBuilder ?? throw new ArgumentNullException(nameof(name));
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
             _sheetName = name.Trim();
-            if (excelModelBuilder._typeDictionary.ContainsKey(typeof(T)))
-                throw new InvalidOperationException($"Type {typeof(T).Name} already exists in the database model");
             excelModelBuilder._sheetDictionary.Add(_sheetName.ToLower(), this);
             excelModelBuilder._sheets.Add(this);
-            excelModelBuilder._typeDictionary.Add(typeof(T), this);
+            if (!excelModelBuilder._typeDictionary.ContainsKey(typeof(T)))
+                excelModelBuilder._typeDictionary.Add(typeof(T), this);
         }
 
         public SheetModelBuilder<T> AlternateName(string name)

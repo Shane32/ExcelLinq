@@ -33,7 +33,8 @@ namespace Shane32.ExcelLinq
                 _sheetNameLookup.Add(sheet.Name, i);
                 foreach (var sheetName in sheet.AlternateNames)
                     _sheetNameLookup.Add(sheetName, i);
-                _typeLookup.Add(sheet.Type, i);
+                if (!_typeLookup.ContainsKey(sheet.Type))
+                    _typeLookup.Add(sheet.Type, i);
             }
             _initialized = true;
         }
@@ -53,7 +54,8 @@ namespace Shane32.ExcelLinq
                 _sheetNameLookup.Add(sheet.Name, i);
                 foreach (var sheetName in sheet.AlternateNames)
                     _sheetNameLookup.Add(sheetName, i);
-                _typeLookup.Add(sheet.Type, i);
+                if (!_typeLookup.ContainsKey(sheet.Type))
+                    _typeLookup.Add(sheet.Type, i);
             }
             _initialized = true;
         }
@@ -64,6 +66,7 @@ namespace Shane32.ExcelLinq
         {
             using var stream = new FileStream(filename ?? throw new ArgumentNullException(nameof(filename)), FileMode.Open, FileAccess.Read, FileShare.Read);
             using var package = new ExcelPackage(stream);
+            package.Compatibility.IsWorksheets1Based = false;
             _initialized = false;
             _sheets = InitializeReadFile(package);
             _initialized = true;
@@ -84,6 +87,7 @@ namespace Shane32.ExcelLinq
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
             using var package = new ExcelPackage(stream);
+            package.Compatibility.IsWorksheets1Based = false;
             _initialized = false;
             _sheets = InitializeReadFile(package);
             _initialized = true;
@@ -158,13 +162,13 @@ namespace Shane32.ExcelLinq
 
             var sheetArray = Model.Sheets.ToList();
             if (Model.IgnoreSheetNames) {
-                for (var i = 0; i < workbook.Worksheets.Count && i < sheetArray.Count; i++) {
-                    var worksheet = workbook.Worksheets[i];
+                int i = 0;
+                foreach (var worksheet in workbook.Worksheets) {
                     var sheetModel = Model.Sheets[i];
                     var sheetData = OnReadSheet(worksheet, sheetModel);
                     if (sheetData == null)
                         throw new InvalidOperationException($"{nameof(OnReadSheet)} returned null for sheet '{sheetModel.Name}'");
-                    sheets[i] = sheetData;
+                    sheets[i++] = sheetData;
                 }
             } else {
                 foreach (var workSheet in workbook.Worksheets) {
@@ -519,9 +523,19 @@ namespace Shane32.ExcelLinq
             return (List<T>)_sheets[_typeLookup[typeof(T)]];
         }
 
+        public List<T> GetSheet<T>(string name)
+        {
+            if (!_initialized)
+                throw new InvalidOperationException();
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+            return (List<T>)_sheets[_sheetNameLookup[name]];
+        }
+
         public virtual ExcelPackage SerializeToExcelPackage()
         {
             var excelPackage = new ExcelPackage();
+            excelPackage.Compatibility.IsWorksheets1Based = false;
             OnWriteFile(excelPackage.Workbook);
             return excelPackage;
         }
