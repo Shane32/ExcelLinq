@@ -23,19 +23,20 @@ namespace Shane32.ExcelLinq.Builders
         public SheetModelBuilder(ExcelModelBuilder excelModelBuilder, string name)
         {
             _excelModelBuilder = excelModelBuilder ?? throw new ArgumentNullException(nameof(name));
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name));
             _sheetName = name.Trim();
-            if (excelModelBuilder._typeDictionary.ContainsKey(typeof(T)))
-                throw new InvalidOperationException($"Type {typeof(T).Name} already exists in the database model");
             excelModelBuilder._sheetDictionary.Add(_sheetName.ToLower(), this);
             excelModelBuilder._sheets.Add(this);
-            excelModelBuilder._typeDictionary.Add(typeof(T), this);
+            if (!excelModelBuilder._typeDictionary.ContainsKey(typeof(T)))
+                excelModelBuilder._typeDictionary.Add(typeof(T), this);
         }
 
 
         public SheetModelBuilder<T> AlternateName(string name)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name));
             name = name.Trim();
             _excelModelBuilder._sheetDictionary.Add(name.ToLower(), this);
             _sheetAlternateNames.Add(name);
@@ -52,7 +53,8 @@ namespace Shane32.ExcelLinq.Builders
 
         public ColumnModelBuilder<T, TReturn> Column<TReturn>(Expression<Func<T, TReturn>> memberAccessor, string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
             if (memberAccessor.Body is MemberExpression memberExpression) {
                 var trimmedName = name.Trim();
                 for (int i = 0; i < _columns.Count; i++) {

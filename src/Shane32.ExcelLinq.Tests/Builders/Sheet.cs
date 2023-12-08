@@ -84,11 +84,11 @@ namespace Builders
         }
 
         [TestMethod]
-        public void CantAddDuplicateSheetClass()
+        public void CanAddDuplicateSheetClass()
         {
             var builder = new ExcelModelBuilder();
             builder.Sheet<Class1>("Sheet1");
-            Assert.ThrowsException<InvalidOperationException>(() => builder.Sheet<Class1>("Sheet2"));
+            builder.Sheet<Class1>("Sheet2");
         }
 
         [TestMethod]

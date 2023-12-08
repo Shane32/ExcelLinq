@@ -17,6 +17,7 @@ namespace Writing
         public void Multiple()
         {
             var package = new ExcelPackage();
+            package.Compatibility.IsWorksheets1Based = false;
             var workbook = package.Workbook;
             var mock = new Mock<SampleContext>();
             mock.CallBase = true;

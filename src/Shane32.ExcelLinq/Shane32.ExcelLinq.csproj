@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EPPlus-LGPL" Version="4.5.3.9" />
     <PackageReference Include="CsvTextFieldParser" Version="1.2.2" />
-    <PackageReference Include="EPPlus" Version="4.5.3.3" />
   </ItemGroup>
 
   <ItemGroup>
