@@ -7,6 +7,10 @@
     <TargetFrameworks>netcoreapp3.1;net5.0;net6.0;net462;net48</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <WarningsAsErrors>$(WarningsAsErrors);CA1416</WarningsAsErrors>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="coverlet.msbuild" Version="2.9.0">
       <PrivateAssets>all</PrivateAssets>

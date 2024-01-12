@@ -64,8 +64,9 @@ namespace Shane32.ExcelLinq.Tests.Models
                 worksheet.Calculate();
                 for (int col = 1; col <= worksheet.Dimension.End.Column; col++) {
                     var column = worksheet.Column(col);
-                    column.AutoFit();
-                    column.Width *= 1.2;
+                    //not available on linux:
+                    //column.AutoFit();
+                    //column.Width *= 1.2;
                 }
                 worksheet.Cells[1, 1].Value = "This is a test header";
             });
