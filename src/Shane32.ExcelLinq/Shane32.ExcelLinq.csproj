@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPPlus-LGPL" Version="4.5.3.10" />
+    <PackageReference Include="EPPlus-LGPL" Version="4.5.3.11" />
   </ItemGroup>
 
   <ItemGroup>
