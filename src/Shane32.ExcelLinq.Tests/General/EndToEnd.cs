@@ -26,8 +26,10 @@ namespace General
         public void ReadSampleCsvFile()
         {
             var xl = new TestFileContext();
-            using var stream = new System.IO.FileStream("test.csv", System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
-            xl.ReadCsv<Class1>(stream);
+            using var stream1 = new System.IO.FileStream("test1.csv", System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+            using var stream2 = new System.IO.FileStream("test2.csv", System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+            xl.ReadCsv<Class1>(stream1, "Sheet1");
+            xl.ReadCsv<Class1>(stream2, "Sheet2");
             ReadSample1File_test(xl);
         }
 
@@ -65,10 +67,11 @@ namespace General
             Assert.AreEqual(xl.GetSheet<Class1>().Count, xl2.GetSheet<Class1>().Count);
         }
 
-        public void ReadSample1File_test(TestFileContext xl) {
+        public void ReadSample1File_test(TestFileContext xl)
+        {
             var sheet1 = xl.GetSheet<TestFileContext.Sheet1>();
             var sheet2 = xl.GetSheet<Class1>();
-            //Assert.AreEqual(2, sheet1.Count);
+            Assert.AreEqual(2, sheet1.Count);
             var s1row = sheet1[0];
 
             Assert.AreEqual(DateTime.Parse("7/1/2020"), s1row.Date);

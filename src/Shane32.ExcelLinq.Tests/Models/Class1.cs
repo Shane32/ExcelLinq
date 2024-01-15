@@ -2,7 +2,7 @@ using System;
 
 namespace Shane32.ExcelLinq.Tests.Models
 {
-    public class Class1
+    class Class1
     {
         public string StringColumn;
         public int IntColumn;

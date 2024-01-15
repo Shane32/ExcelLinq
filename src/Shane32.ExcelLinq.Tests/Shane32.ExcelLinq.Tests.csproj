@@ -9,11 +9,19 @@
 
   <ItemGroup>
     <None Remove="test.csv" />
+    <None Remove="test1.csv" />
+    <None Remove="test2.csv" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="test.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="test1.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="test2.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
