@@ -550,6 +550,87 @@ namespace Shane32.ExcelLinq
             using var stream = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
             SerializeToStream(stream);
         }
+
+        public virtual string SerializeToCsv()
+        {
+            var sw = new StringWriter();
+            SerializeToCsv(sw);
+            return sw.ToString();
+        }
+
+        public virtual void SerializeToCsv(TextWriter textWriter)
+        {
+            if (_sheets.Count != 1)
+                throw new InvalidOperationException("This workbook must contain only a single sheet.");
+            var package = SerializeToExcelPackage();
+            var sheet = package.Workbook.Worksheets[0];
+            var columns = sheet.Dimension?.Columns ?? 0;
+            var rows = sheet.Dimension?.Rows ?? 0;
+            var sb = new System.Text.StringBuilder();
+            var data = new List<string>();
+            package.Compatibility.IsWorksheets1Based = false;
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < columns; j++) {
+                    var cell = sheet.Cells[i, j];
+                    if (cell == null)
+                        data.Add("");
+                    else
+                        data.Add(FormatCellForCsv(cell));
+                }
+                textWriter.WriteLine(string.Join(",", data));
+                data.Clear();
+            }
+        }
+
+        protected string FormatCellForCsv(ExcelRange cell)
+        {
+            if (cell.Value == null)
+                return "";
+            if (cell.Value is string stringValue)
+                return "\"" + stringValue.Replace("\"", "\"\"").Replace("\r", "").Replace("\n", "") + "\"";
+            if (cell.Value is DateTimeOffset dateOffsetValue)
+                throw new NotSupportedException("DateTimeOffset not supported");
+            var formatString = cell.Style?.Numberformat?.Format ?? "";
+            if (cell.Value is DateTime dateValue) {
+                if (formatString == "")
+                    return dateValue.ToString();
+                else
+                    return dateValue.ToString(ConvertDateFormat(formatString));
+            }
+            var numberValue = (double)Convert.ChangeType(cell.Value, typeof(double));
+            var formatStrings = formatString.Split(';');
+            var positiveFormat = formatStrings.Length > 0 ? formatStrings[0] : "";
+            var negativeFormat = formatStrings.Length > 1 ? formatStrings[1] : "";
+            var zeroFormat = formatStrings.Length > 2 ? formatStrings[2] : "";
+            negativeFormat = negativeFormat == "" ? positiveFormat : negativeFormat;
+            zeroFormat = zeroFormat == "" ? positiveFormat : zeroFormat;
+            if (numberValue > 0 || double.IsPositiveInfinity(numberValue) || double.IsNaN(numberValue)) {
+                if (positiveFormat == "")
+                    return numberValue.ToString();
+                else
+                    return numberValue.ToString(ConvertNumberFormat(positiveFormat));
+            } else if (numberValue < 0 || double.IsNegativeInfinity(numberValue)) {
+                if (negativeFormat == "")
+                    return numberValue.ToString();
+                else
+                    return numberValue.ToString(ConvertNumberFormat(negativeFormat));
+            } else {
+                if (zeroFormat == "")
+                    return numberValue.ToString();
+                else
+                    return numberValue.ToString(ConvertNumberFormat(zeroFormat));
+            }
+
+            string ConvertNumberFormat(string numberFormat)
+            {
+                return numberFormat;
+            }
+
+            string ConvertDateFormat(string dateFormat)
+            {
+                return dateFormat;
+            }
+        }
     }
 
 
